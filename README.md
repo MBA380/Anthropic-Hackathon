@@ -19,8 +19,9 @@ data and ABA-informed principles.
 
 ## Deployment
 
-1. Create a .env.local file in your project root directory and provide your OpenWeatherMap API key as **OPENWEATHER_API_KEY=key**
-2. Create a .env file within the backend/ directory and provide your Anthropic Claude API key as **ANTHROPIC_API_KEY=key**
-3. Download dependencies by running 'pnpm install' then 'pnpm run dev' to start the server
-4. Run backend/app.py
-5. Use the application by navigating to localhost:3000
+1. Clone the repository
+2. Create a .env.local file in your project root directory and provide your OpenWeatherMap API key as **OPENWEATHER_API_KEY=key**
+3. Create a .env file within the backend/ directory and provide your Anthropic Claude API key as **ANTHROPIC_API_KEY=key**
+4. Download dependencies by running 'pnpm install' then 'pnpm run dev' to start the server
+5. Run backend/app.py
+6. Use the application by navigating to localhost:3000

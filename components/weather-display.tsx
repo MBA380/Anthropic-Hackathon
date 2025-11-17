@@ -29,7 +29,7 @@ export default function WeatherDisplay() {
         });
 
         // Call OpenWeatherMap API
-        const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
+        const apiKey = process.env.OPENWEATHER_API_KEY;
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=${apiKey}&units=metric`
         );

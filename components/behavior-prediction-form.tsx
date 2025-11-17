@@ -1,7 +1,5 @@
 'use client';
-// ToDo: Change "Time since last meal" and "Time since last bathroom" to option box
-//  inputs to select when they had their last meal and then another option to input
-//  more meals/bathroom visits
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,8 +28,6 @@ interface FormData {
   predictionTime: string;
   meals: MealEntry[];
   bathroomVisits: BathroomEntry[];
-  screenTimeToday: number;
-  timeSinceOutdoor: number;
   socialInteractionLevel: string;
   recentTransitions: number;
 }
@@ -55,8 +51,6 @@ export default function BehaviorPredictionForm({
     predictionTime: '',
     meals: [],
     bathroomVisits: [],
-    screenTimeToday: 0,
-    timeSinceOutdoor: 0,
     socialInteractionLevel: '',
     recentTransitions: 0,
   });
@@ -334,36 +328,6 @@ export default function BehaviorPredictionForm({
                 ))
               )}
             </div>
-          </div>
-
-          {/* Screen Time Today */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Screen Time Today (minutes)
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={formData.screenTimeToday}
-              onChange={(e) => handleNumberChange('screenTimeToday', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 240"
-            />
-          </div>
-
-          {/* Time Since Last Outdoor Activity */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Time Since Last Outdoor/Fresh Air (minutes)
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={formData.timeSinceOutdoor}
-              onChange={(e) => handleNumberChange('timeSinceOutdoor', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 180"
-            />
           </div>
 
           {/* Recent Social Interaction Level */}

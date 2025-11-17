@@ -23,7 +23,7 @@ data and ABA-informed principles.
 2. Create a .env.local file in your project root directory and provide your OpenWeatherMap API key as **OPENWEATHER_API_KEY=key**
 3. Create a .env file within the backend/ directory and provide your Anthropic Claude API key as **ANTHROPIC_API_KEY=key**
 4. Download dependencies by running 'pnpm install' then 'pnpm run dev' to start the server
-5. Create python venv using uv (recommended) with "uv venv" then "source .venv/bin/activate"
+5. Create python venv using [uv](https://docs.astral.sh/uv/) (recommended) with "uv venv" then "source .venv/bin/activate"
 6. Install backend dependencies with "uv pip install -r backend/requirements.txt"
 7. Run "python backend/app.py" to start the backend server
 8. Use the application by navigating to localhost:3000

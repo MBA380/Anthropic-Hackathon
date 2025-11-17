@@ -28,10 +28,9 @@ export default function WeatherDisplay() {
           );
         });
 
-        // Call OpenWeatherMap API
-        const apiKey = process.env.OPENWEATHER_API_KEY;
+        // Call API route instead of OpenWeather directly
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=${apiKey}&units=metric`
+          `/api/weather?lat=${position.latitude}&lon=${position.longitude}`
         );
 
         if (!response.ok) throw new Error('Failed to fetch weather');

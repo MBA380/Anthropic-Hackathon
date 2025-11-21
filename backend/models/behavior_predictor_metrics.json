@@ -32,7 +32,7 @@
       "support": 1600.0
     }
   },
-  "model_path": "C:\\Users\\punja\\OneDrive\\Desktop\\athropic\\Anthropic-Hackathon\\backend\\models\\behavior_predictor.joblib",
+  "model_path": "models/behavior_predictor.joblib",
   "train_samples": 6400,
   "val_samples": 1600,
   "top_feature_importance": [

@@ -34,35 +34,47 @@ def predict():
         data = request.json
         print(f"Received data: {data}")
 
-        sleep_quality = data.get('sleepQuality')
-        time_since_last_meal = data.get('timeSinceLastMeal')
-        time_since_last_bathroom = data.get('timeSinceLastBathroom')
-        screen_time_today = data.get('screenTimeToday')
-        time_since_outdoor = data.get('timeSinceOutdoor')
-        social_interaction_level = data.get('socialInteractionLevel')
-        recent_transitions = data.get('recentTransitions')
-        prediction_time = data.get('predictionTime')
+        sleep_quality = data.get('sleepQuality', 'Unknown')
+        prediction_time = data.get('predictionTime', '')
+        meals = data.get('meals', [])
+        bathroom_visits = data.get('bathroomVisits', [])
+        social_interaction_context = data.get('socialInteractionContext', 'Unknown')
+        transition_type = data.get('transitionType', 'none')
+
+        # Format meals for the prompt
+        meals_summary = []
+        if meals:
+            for meal in meals:
+                meals_summary.append(f"{meal.get('type', 'meal').capitalize()} at {meal.get('time', 'unknown time')}")
+        meals_str = ', '.join(meals_summary) if meals_summary else "No meals logged"
+
+        # Format bathroom visits for the prompt
+        bathroom_summary = []
+        if bathroom_visits:
+            for visit in bathroom_visits:
+                bathroom_summary.append(f"{visit.get('type', 'unknown').capitalize()} at {visit.get('time', 'unknown time')}")
+        bathroom_str = ', '.join(bathroom_summary) if bathroom_summary else "No bathroom visits logged"
 
         context = f"""
         You are an autism behavior prediction specialist. Analyze the following behavioral and environmental factors to predict stress/behavior levels and provide recommendations.
 
         Current Status:
         - Sleep Quality: {sleep_quality}
-        - Time Since Last Meal: {time_since_last_meal} minutes
-        - Time Since Last Bathroom: {time_since_last_bathroom} minutes
-        - Screen Time Today: {screen_time_today} minutes
-        - Time Since Outdoor Activity: {time_since_outdoor} minutes
-        - Social Interaction Level: {social_interaction_level}
-        - Recent Transitions: {recent_transitions}
+        - Meals/Snacks: {meals_str}
+        - Bathroom Visits: {bathroom_str}
+        - Social Interaction Context: {social_interaction_context}
+        - Transition Type: {transition_type}
         - Prediction Time: {prediction_time if prediction_time else 'Current time'}
 
         Please provide:
-        1. A prediction of expected behavior/stress level (Low, Moderate, or High)
-        2. Confidence level (0-100%)
-        3. Key factors influencing this prediction
-        4. Specific recommendations to support positive outcomes
+        1. A prediction of expected behavior/stress level (describe the likely behavior state)
+        2. Confidence level (as a decimal between 0 and 1, e.g., 0.85 for 85%)
+        3. Specific recommendations to support positive outcomes (provide 3-5 actionable recommendations)
 
-        Format your response as JSON with keys: prediction, confidence, factors, recommendations
+        Format your response as JSON with keys: prediction, confidence, recommendations
+        The prediction should be a descriptive sentence about the expected behavior.
+        The confidence should be a number between 0 and 1.
+        The recommendations should be an array of strings with specific, actionable advice.
         """
 
         print("Calling Claude API...")
@@ -85,17 +97,24 @@ def predict():
         except (json.JSONDecodeError, ValueError) as e:
             print(f"JSON parsing error: {e}")
             prediction_data = {
-                'prediction': 'Moderate',
-                'confidence': 50,
-                'factors': ['Unable to parse response'],
-                'recommendations': ['Please try again']
+                'prediction': 'Moderate stress level expected',
+                'confidence': 0.5,
+                'recommendations': ['Unable to parse response - please try again']
             }
+
+        # Ensure confidence is a decimal between 0 and 1
+        confidence = prediction_data.get('confidence', 0.5)
+        if isinstance(confidence, (int, float)):
+            if confidence > 1:
+                confidence = confidence / 100.0
+            confidence = max(0.0, min(1.0, confidence))
+        else:
+            confidence = 0.5
 
         response = {
             'prediction': prediction_data.get('prediction', 'Moderate stress level expected'),
-            'confidence': prediction_data.get('confidence', 0),
-            'factors': prediction_data.get('factors', []),
-            'recommendations': prediction_data.get('recommendations', []),
+            'confidence': confidence,
+            'recommendations': prediction_data.get('recommendations', ['Please try again']),
             'timestamp': datetime.now().isoformat(),
             'input_data': data
         }

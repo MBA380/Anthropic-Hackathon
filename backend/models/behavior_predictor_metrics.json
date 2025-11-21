@@ -1,0 +1,91 @@
+{
+  "accuracy": 0.8438,
+  "macro_f1": 0.6642,
+  "class_distribution": {
+    "1": 0.852,
+    "0": 0.148
+  },
+  "classification_report": {
+    "0": {
+      "precision": 0.46632124352331605,
+      "recall": 0.379746835443038,
+      "f1-score": 0.4186046511627907,
+      "support": 237.0
+    },
+    "1": {
+      "precision": 0.8955223880597015,
+      "recall": 0.9244314013206163,
+      "f1-score": 0.9097472924187726,
+      "support": 1363.0
+    },
+    "accuracy": 0.84375,
+    "macro avg": {
+      "precision": 0.6809218157915088,
+      "recall": 0.6520891183818271,
+      "f1-score": 0.6641759717907817,
+      "support": 1600.0
+    },
+    "weighted avg": {
+      "precision": 0.8319469685252495,
+      "recall": 0.84375,
+      "f1-score": 0.8369967886827303,
+      "support": 1600.0
+    }
+  },
+  "model_path": "C:\\Users\\punja\\OneDrive\\Desktop\\athropic\\Anthropic-Hackathon\\backend\\models\\behavior_predictor.joblib",
+  "train_samples": 6400,
+  "val_samples": 1600,
+  "top_feature_importance": [
+    {
+      "feature": "behaviour_level",
+      "importance": 0.1145,
+      "relative_importance": 0.1145
+    },
+    {
+      "feature": "time_since_last_void_min",
+      "importance": 0.1092,
+      "relative_importance": 0.1092
+    },
+    {
+      "feature": "time_since_last_meal_min",
+      "importance": 0.108,
+      "relative_importance": 0.108
+    },
+    {
+      "feature": "time_numeric",
+      "importance": 0.105,
+      "relative_importance": 0.105
+    },
+    {
+      "feature": "humidity_percent",
+      "importance": 0.0913,
+      "relative_importance": 0.0913
+    },
+    {
+      "feature": "recent_accident_flag",
+      "importance": 0.0794,
+      "relative_importance": 0.0794
+    },
+    {
+      "feature": "temperature_c",
+      "importance": 0.0694,
+      "relative_importance": 0.0694
+    },
+    {
+      "feature": "transition_type_numeric",
+      "importance": 0.063,
+      "relative_importance": 0.063
+    },
+    {
+      "feature": "weekday_numeric",
+      "importance": 0.0519,
+      "relative_importance": 0.0519
+    },
+    {
+      "feature": "social_context_numeric",
+      "importance": 0.0398,
+      "relative_importance": 0.0398
+    }
+  ],
+  "decision_threshold": 0.59
+}

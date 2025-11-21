@@ -63,13 +63,15 @@ export default function Home() {
             />
           </div>
 
-          {/* Right Column - Weather & Results */}
+          {/* Right Column - Results Only */}
           <div className="space-y-8">
-            <WeatherDisplay />
             {prediction && <PredictionResult data={prediction} />}
           </div>
         </div>
       </div>
+
+      {/* Weather display renders invisibly to fetch weather data in background */}
+      <WeatherDisplay />
     </main>
   );
 }

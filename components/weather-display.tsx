@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface WeatherData {
   temperature: number;
@@ -14,8 +13,6 @@ interface WeatherData {
 
 export default function WeatherDisplay() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -36,83 +33,36 @@ export default function WeatherDisplay() {
         if (!response.ok) throw new Error('Failed to fetch weather');
 
         const data = await response.json();
-        setWeatherData({
+        const weather = {
           temperature: Math.round(data.main.temp),
           condition: data.weather[0].main,
           humidity: data.main.humidity,
           windSpeed: data.wind.speed,
           location: data.name,
           feelsLike: Math.round(data.main.feels_like),
+        };
+
+        setWeatherData(weather);
+
+        // Log weather data to console
+        console.log('Current Weather Data:', weather);
+        console.log('Weather Details:', {
+          location: weather.location,
+          temperature: `${weather.temperature}°C`,
+          feelsLike: `${weather.feelsLike}°C`,
+          condition: weather.condition,
+          humidity: `${weather.humidity}%`,
+          windSpeed: `${weather.windSpeed} m/s`,
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unable to fetch weather');
-      } finally {
-        setLoading(false);
+        const errorMessage = err instanceof Error ? err.message : 'Unable to fetch weather';
+        console.error('Weather fetch error:', errorMessage);
       }
     };
 
     fetchWeather();
   }, []);
 
-  if (loading) return <div className="p-4">Loading weather...</div>;
-  if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
-  if (!weatherData) return null;
-
-  return (
-    <Card className="bg-white dark:bg-slate-800 shadow-md border-slate-200 dark:border-slate-700">
-      <CardHeader>
-        <CardTitle className="text-xl">Current Weather</CardTitle>
-        <CardDescription>Environmental context</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Location</p>
-          <p className="text-lg font-semibold text-slate-900 dark:text-white">
-            {weatherData.location}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg">
-            <p className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-              Temperature
-            </p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {weatherData.temperature}°C
-            </p>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-              Feels like {weatherData.feelsLike}°C
-            </p>
-          </div>
-
-          <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg">
-            <p className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-              Condition
-            </p>
-            <p className="text-lg font-semibold text-slate-900 dark:text-white">
-              {weatherData.condition}
-            </p>
-          </div>
-
-          <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg">
-            <p className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-              Humidity
-            </p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {weatherData.humidity}%
-            </p>
-          </div>
-
-          <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg">
-            <p className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wide">
-              Wind Speed
-            </p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {weatherData.windSpeed} m/s
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  // Return null to not render anything
+  return null;
 }

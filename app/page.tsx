@@ -14,6 +14,7 @@ export default function Home() {
   const handleFormSubmit = async (formData: any) => {
     setLoading(true);
     try {
+      // const response = await fetch('http://localhost:5000/predict', {
       const response = await fetch('/api/predict', {
         method: 'POST',
         headers: {
@@ -23,7 +24,10 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get prediction');
+          const errorData = await response.json();
+          console.error('Backend error:', errorData);
+          throw new Error(`Failed to get prediction: ${errorData.error || response.statusText}`);
+
       }
 
       const result = await response.json();
@@ -109,7 +113,7 @@ export default function Home() {
       <WeatherDisplay />
 
       {/* Floating chat bubble in the bottom-right, only after there is a prediction */}
-      {prediction && <ChatAgentOverlay />}
+      {prediction && <ChatAgentOverlay predictionContext={prediction} />}
     </main>
   );
 }

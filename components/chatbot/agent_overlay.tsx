@@ -14,7 +14,11 @@ interface ChatMessage {
   timestamp: string
 }
 
-export function ChatAgentOverlay() {
+interface ChatAgentOverlayProps {
+  predictionContext?: any
+}
+
+export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -22,8 +26,9 @@ export function ChatAgentOverlay() {
     {
       id: 'welcome',
       role: 'assistant',
-      content:
-        "Hi! I'm your autism-support AI assistant. You can ask me about behaviors, routines, or anything you're curious about.",
+      content: predictionContext
+        ? "Hi! I'm your autism-support AI assistant. I have access to your recent behavioral prediction results. Feel free to ask me questions about the analysis, risk factors, recommendations, or anything else you're curious about!"
+        : "Hi! I'm your autism-support AI assistant. You can ask me about behaviors, routines, or anything you're curious about.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ])
@@ -50,6 +55,37 @@ export function ChatAgentOverlay() {
     setInput('')
     setIsSending(true)
 
+    // Build system prompt with prediction context if available
+    let systemPrompt = 'You are an autism-support AI assistant. Be gentle, clear, and supportive. You are not a doctor and cannot give medical diagnoses.';
+
+    if (predictionContext) {
+      const riskLevel = predictionContext.prediction_label || (predictionContext.prediction === 1 ? 'High Risk' : 'Low Risk');
+      const confidence = predictionContext.confidence ? Math.round(predictionContext.confidence * 100) : 'N/A';
+
+      systemPrompt += `\n\nYou have access to the following behavioral prediction analysis for the user. Use this context to provide informed, personalized responses:\n\n`;
+      systemPrompt += `PREDICTION SUMMARY:\n`;
+      systemPrompt += `- Risk Level: ${riskLevel}\n`;
+      systemPrompt += `- Confidence: ${confidence}%\n`;
+
+      if (predictionContext.probabilities) {
+        systemPrompt += `- High Risk Probability: ${Math.round(predictionContext.probabilities.high_risk * 100)}%\n`;
+        systemPrompt += `- Low Risk Probability: ${Math.round(predictionContext.probabilities.low_risk * 100)}%\n`;
+      }
+
+      if (predictionContext.weather_used) {
+        systemPrompt += `\nWEATHER CONTEXT:\n`;
+        systemPrompt += `- Temperature: ${predictionContext.weather_used.temperature}°C\n`;
+        systemPrompt += `- Humidity: ${predictionContext.weather_used.humidity}%\n`;
+        systemPrompt += `- Condition: ${predictionContext.weather_used.condition}\n`;
+      }
+
+      if (predictionContext.analysis) {
+        systemPrompt += `\nFULL BEHAVIORAL ANALYSIS:\n${predictionContext.analysis}\n`;
+      }
+
+      systemPrompt += `\nUse this information to answer questions about the prediction, explain risk factors, suggest interventions, or provide support. Be specific and reference the actual data when relevant.`;
+    }
+
         try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -62,8 +98,7 @@ export function ChatAgentOverlay() {
             // optional system prompt to steer behavior
             {
               role: 'system',
-              content:
-                'You are an autism-support AI assistant. Be gentle, clear, and supportive. You are not a doctor and cannot give medical diagnoses.',
+              content: systemPrompt,
             },
             ...messages.map(m => ({
               role: m.role,

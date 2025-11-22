@@ -39,6 +39,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Extract system message from the messages array if provided, otherwise use default
+    const systemMessage = messages.find((m) => m.role === 'system');
+    const systemPrompt = systemMessage?.content || SYSTEM_PROMPT;
+
     // ❗ Only keep user & assistant messages. Ignore any "system" roles completely.
     const nonSystemMessages = messages.filter(
       (m) => m.role === 'user' || m.role === 'assistant',
@@ -51,8 +55,8 @@ export async function POST(req: NextRequest) {
 
     const requestBody = {
       model: MODEL_NAME,
-      max_tokens: 512,
-      system: SYSTEM_PROMPT, // top-level system prompt ✅
+      max_tokens: 1024, // Increased for more detailed responses with context
+      system: systemPrompt, // Use the system prompt from frontend or default ✅
       messages: anthropicMessages, // only user & assistant ✅
     };
 

@@ -13,8 +13,9 @@ import pandas as pd
 
 WEATHER_PROFILES = {
     0: {"temp": (16, 26), "humidity": (40, 65)},  # clear/calm
-    1: {"temp": (18, 28), "humidity": (55, 80)},  # overcast
-    2: {"temp": (20, 32), "humidity": (65, 95)},  # stormy/humid
+    1: {"temp": (18, 28), "humidity": (55, 80)},  # cloudy/overcast
+    2: {"temp": (20, 30), "humidity": (60, 90)},  # rain/drizzle
+    3: {"temp": (22, 34), "humidity": (70, 100)},  # storm/thunderstorm
 }
 
 TRANSITION_CHOICES = np.array([0, 1, 2, 3])
@@ -63,7 +64,7 @@ def _clip01(value: float) -> float:
 
 
 def _sample_weather(rng: np.random.Generator) -> tuple[int, int, int]:
-    weather_type = int(rng.choice([0, 1, 2], p=[0.5, 0.3, 0.2]))
+    weather_type = int(rng.choice([0, 1, 2, 3], p=[0.4, 0.3, 0.2, 0.1]))
     temp_low, temp_high = WEATHER_PROFILES[weather_type]["temp"]
     hum_low, hum_high = WEATHER_PROFILES[weather_type]["humidity"]
     temperature_c = int(rng.integers(temp_low, temp_high + 1))
@@ -143,7 +144,7 @@ def generate_samples(
         risk += function_inferred_numeric * 0.06
         risk += max(0.0, (temperature_c - 24) / 10) * 0.08
         risk += max(0.0, (humidity_percent - 65) / 30) * 0.07
-        risk += {0: 0.0, 1: 0.03, 2: 0.08}[weather_type_numeric]
+        risk += {0: 0.0, 1: 0.02, 2: 0.05, 3: 0.1}[weather_type_numeric]
 
         if weekday_numeric >= 5:  # weekend staffing/novelty
             risk += 0.04

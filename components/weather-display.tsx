@@ -44,16 +44,22 @@ export default function WeatherDisplay() {
 
         setWeatherData(weather);
 
-        // Log weather data to console
-        console.log('Current Weather Data:', weather);
-        console.log('Weather Details:', {
-          location: weather.location,
-          temperature: `${weather.temperature}°C`,
-          feelsLike: `${weather.feelsLike}°C`,
-          condition: weather.condition,
-          humidity: `${weather.humidity}%`,
-          windSpeed: `${weather.windSpeed} m/s`,
+        // Send weather data to backend
+        await fetch('http://localhost:5000/weather', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            temperature: weather.temperature,
+            feels_like: weather.feelsLike,
+            humidity: weather.humidity,
+            wind_speed: weather.windSpeed,
+            condition: weather.condition,
+            location: weather.location,
+            timestamp: new Date().toISOString(),
+          }),
         });
+
+        console.log('Weather data sent to backend:', weather);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unable to fetch weather';
         console.error('Weather fetch error:', errorMessage);
@@ -63,6 +69,5 @@ export default function WeatherDisplay() {
     fetchWeather();
   }, []);
 
-  // Return null to not render anything
   return null;
 }

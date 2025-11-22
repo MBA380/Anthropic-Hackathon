@@ -48,12 +48,14 @@ NUMERIC_FEATURES = [
     "toileting_status_bucket_numeric",
     "transition_type_numeric",
     "social_context_numeric",
+]
+
+DROP_COLUMNS = [
+    "behaviour_topography",
     "antecedent_category_numeric",
     "function_inferred_numeric",
     "behaviour_level",
 ]
-
-DROP_COLUMNS = ["behaviour_topography"]
 TARGET_COLUMN = "escalation_label"
 TOP_FEATURE_LIMIT = 10
 

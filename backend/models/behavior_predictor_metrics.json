@@ -1,34 +1,34 @@
 {
-  "accuracy": 0.8481,
-  "macro_f1": 0.6943,
+  "accuracy": 0.8369,
+  "macro_f1": 0.6372,
   "class_distribution": {
     "1": 0.857,
     "0": 0.143
   },
   "classification_report": {
     "0": {
-      "precision": 0.4703389830508475,
-      "recall": 0.4847161572052402,
-      "f1-score": 0.4774193548387097,
+      "precision": 0.41304347826086957,
+      "recall": 0.3318777292576419,
+      "f1-score": 0.36803874092009686,
       "support": 229.0
     },
     "1": {
-      "precision": 0.9134897360703812,
-      "recall": 0.9088256746900073,
-      "f1-score": 0.9111517367458867,
+      "precision": 0.8919491525423728,
+      "recall": 0.9212253829321663,
+      "f1-score": 0.9063509149623251,
       "support": 1371.0
     },
-    "accuracy": 0.848125,
+    "accuracy": 0.836875,
     "macro avg": {
-      "precision": 0.6919143595606143,
-      "recall": 0.6967709159476237,
-      "f1-score": 0.6942855457922982,
+      "precision": 0.6524963154016212,
+      "recall": 0.6265515560949041,
+      "f1-score": 0.637194827941211,
       "support": 1600.0
     },
     "weighted avg": {
-      "precision": 0.8500637845444604,
-      "recall": 0.848125,
-      "f1-score": 0.849073789585422,
+      "precision": 0.8234057779108326,
+      "recall": 0.836875,
+      "f1-score": 0.8293049850525313,
       "support": 1600.0
     }
   },
@@ -37,55 +37,55 @@
   "val_samples": 1600,
   "top_feature_importance": [
     {
-      "feature": "time_since_last_void_min",
-      "importance": 0.1106,
-      "relative_importance": 0.1106
+      "feature": "time_since_last_meal_min",
+      "importance": 0.1361,
+      "relative_importance": 0.1361
     },
     {
-      "feature": "time_since_last_meal_min",
-      "importance": 0.1103,
-      "relative_importance": 0.1103
+      "feature": "time_since_last_void_min",
+      "importance": 0.1323,
+      "relative_importance": 0.1323
     },
     {
       "feature": "time_numeric",
-      "importance": 0.1075,
-      "relative_importance": 0.1075
-    },
-    {
-      "feature": "behaviour_level",
-      "importance": 0.0955,
-      "relative_importance": 0.0955
+      "importance": 0.1288,
+      "relative_importance": 0.1288
     },
     {
       "feature": "humidity_percent",
-      "importance": 0.0914,
-      "relative_importance": 0.0914
+      "importance": 0.1115,
+      "relative_importance": 0.1115
     },
     {
       "feature": "recent_accident_flag",
-      "importance": 0.0868,
-      "relative_importance": 0.0868
+      "importance": 0.105,
+      "relative_importance": 0.105
     },
     {
       "feature": "temperature_c",
-      "importance": 0.0714,
-      "relative_importance": 0.0714
+      "importance": 0.0838,
+      "relative_importance": 0.0838
     },
     {
       "feature": "transition_type_numeric",
-      "importance": 0.0631,
-      "relative_importance": 0.0631
+      "importance": 0.0789,
+      "relative_importance": 0.0789
     },
     {
       "feature": "weekday_numeric",
-      "importance": 0.0529,
-      "relative_importance": 0.0529
+      "importance": 0.0621,
+      "relative_importance": 0.0621
     },
     {
-      "feature": "function_inferred_numeric",
-      "importance": 0.0399,
-      "relative_importance": 0.0399
+      "feature": "social_context_numeric",
+      "importance": 0.0438,
+      "relative_importance": 0.0438
+    },
+    {
+      "feature": "toileting_status_bucket_numeric",
+      "importance": 0.0432,
+      "relative_importance": 0.0432
     }
   ],
-  "decision_threshold": 0.67
+  "decision_threshold": 0.63
 }

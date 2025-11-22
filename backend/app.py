@@ -27,7 +27,7 @@ if not api_key:
     print(f"Checked .env file at: {env_path}")
     print(f"File exists: {env_path.exists()}")
 
-model_path = Path("backend/models/behavior_model.joblib")
+model_path = Path("backend/models/behavior_predictor.joblib")
 model = joblib.load(model_path)
 
 client = Anthropic(api_key=api_key)

@@ -27,8 +27,8 @@ export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
       id: 'welcome',
       role: 'assistant',
       content: predictionContext
-        ? "Hi! I'm your autism-support AI assistant. I have access to your recent behavioral prediction results. Feel free to ask me questions about the analysis, risk factors, recommendations, or anything else you're curious about!"
-        : "Hi! I'm your autism-support AI assistant. You can ask me about behaviors, routines, or anything you're curious about.",
+        ? "Hi! I'm your BCBA session support assistant. I have access to the behavioral prediction analysis and can provide practical, session-ready strategies for table work, NET, transitions, and other ABA activities. Ask me about antecedents, functions, specific interventions, or what to monitor during the session!"
+        : "Hi! I'm your BCBA session support assistant. I can help with practical ABA strategies for clinic sessions, including antecedent interventions, reinforcement schedules, replacement behaviors, and what to document. How can I support your session today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ])
@@ -56,34 +56,42 @@ export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
     setIsSending(true)
 
     // Build system prompt with prediction context if available
-    let systemPrompt = 'You are an autism-support AI assistant. Be gentle, clear, and supportive. You are not a doctor and cannot give medical diagnoses.';
+    let systemPrompt = 'You are a Board Certified Behavior Analyst (BCBA) providing real-time session support for ABA therapists and RBTs in a clinic setting. Provide practical, concrete, session-ready strategies for table work, NET, transitions, and other ABA activities. Use "do this" language, not vague suggestions.';
 
     if (predictionContext) {
       const riskLevel = predictionContext.prediction_label || (predictionContext.prediction === 1 ? 'High Risk' : 'Low Risk');
       const confidence = predictionContext.confidence ? Math.round(predictionContext.confidence * 100) : 'N/A';
 
-      systemPrompt += `\n\nYou have access to the following behavioral prediction analysis for the user. Use this context to provide informed, personalized responses:\n\n`;
-      systemPrompt += `PREDICTION SUMMARY:\n`;
-      systemPrompt += `- Risk Level: ${riskLevel}\n`;
-      systemPrompt += `- Confidence: ${confidence}%\n`;
+      systemPrompt += `\n\nYou have access to the following behavioral prediction data and ABA analysis. Use this to provide function-based, immediately implementable recommendations:\n\n`;
+      systemPrompt += `BEHAVIORAL PREDICTION DATA:\n`;
+      systemPrompt += `- Predicted Behavior Risk: ${riskLevel}\n`;
+      systemPrompt += `- Model Confidence: ${confidence}%\n`;
 
       if (predictionContext.probabilities) {
-        systemPrompt += `- High Risk Probability: ${Math.round(predictionContext.probabilities.high_risk * 100)}%\n`;
-        systemPrompt += `- Low Risk Probability: ${Math.round(predictionContext.probabilities.low_risk * 100)}%\n`;
+        systemPrompt += `- Probability of Challenging Behavior: ${Math.round(predictionContext.probabilities.high_risk * 100)}%\n`;
+        systemPrompt += `- Probability of Appropriate Behavior: ${Math.round(predictionContext.probabilities.low_risk * 100)}%\n`;
       }
 
       if (predictionContext.weather_used) {
-        systemPrompt += `\nWEATHER CONTEXT:\n`;
+        systemPrompt += `\nENVIRONMENTAL CONTEXT:\n`;
         systemPrompt += `- Temperature: ${predictionContext.weather_used.temperature}°C\n`;
         systemPrompt += `- Humidity: ${predictionContext.weather_used.humidity}%\n`;
-        systemPrompt += `- Condition: ${predictionContext.weather_used.condition}\n`;
+        systemPrompt += `- Weather: ${predictionContext.weather_used.condition}\n`;
       }
 
       if (predictionContext.analysis) {
-        systemPrompt += `\nFULL BEHAVIORAL ANALYSIS:\n${predictionContext.analysis}\n`;
+        systemPrompt += `\nFULL BCBA BEHAVIORAL ANALYSIS:\n${predictionContext.analysis}\n`;
       }
 
-      systemPrompt += `\nUse this information to answer questions about the prediction, explain risk factors, suggest interventions, or provide support. Be specific and reference the actual data when relevant.`;
+      systemPrompt += `\nWhen responding:\n`;
+      systemPrompt += `- Provide concrete, "do this now" strategies that can be implemented in the next 1-2 hours\n`;
+      systemPrompt += `- Reference specific MOs/EOs, antecedents, and functions from the data above\n`;
+      systemPrompt += `- Suggest specific ABA tools: visual schedules, first/then boards, token systems, timers, choice boards\n`;
+      systemPrompt += `- Recommend specific reinforcement strategies: dense SR+ schedules (FR1, VR2), DRA, DRO, behavioral momentum\n`;
+      systemPrompt += `- Include replacement behaviors: FCT, appropriate mands, coping skills\n`;
+      systemPrompt += `- Tell them what precursor behaviors to watch for\n`;
+      systemPrompt += `- Suggest what data to collect and communicate to the supervising BCBA\n`;
+      systemPrompt += `- Be specific about timing, frequency, and implementation details`;
     }
 
         try {

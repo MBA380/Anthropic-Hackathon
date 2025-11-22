@@ -10,8 +10,10 @@ export async function POST(request: Request) {
       sleep_quality_numeric: getSleepQualityNumeric(data.sleepQuality),
       time_numeric: convertTimeToNumeric(data.predictionTime),
       weekday_numeric: new Date().getDay(), // Or get from data if available
-      social_context_numeric: getSocialContextNumeric(data.socialInteractionContext),
-      transition_type_numeric: getTransitionTypeNumeric(data.transitionType),
+      socialInteractionContext: data.socialInteractionContext, // Send raw string value
+      transitionType: data.transitionType, // Send raw string value
+      meals: data.meals || [],
+      bathroomVisits: data.bathroomVisits || [],
       // Calculate time since last meal/void
       time_since_last_meal_min: calculateTimeSince(data.meals?.[0]?.time, data.predictionTime),
       time_since_last_void_min: calculateTimeSince(data.bathroomVisits?.[0]?.time, data.predictionTime),
@@ -57,24 +59,6 @@ function getSleepQualityNumeric(quality: string): number {
   return mapping[quality] || 2;
 }
 
-function getSocialContextNumeric(context: string): number {
-  const mapping: { [key: string]: number } = {
-    'alone': 1,
-    'family': 2,
-    'friends': 3,
-    'public': 4
-  };
-  return mapping[context] || 1;
-}
-
-function getTransitionTypeNumeric(transition: string): number {
-  const mapping: { [key: string]: number } = {
-    'none': 0,
-    'minor': 1,
-    'major': 2
-  };
-  return mapping[transition] || 0;
-}
 
 function calculateTimeSince(eventTime: string | undefined, currentTime: string): number | null {
   if (!eventTime) return null;

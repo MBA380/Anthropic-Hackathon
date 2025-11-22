@@ -131,12 +131,26 @@ def predict():
             # Debug: Log extracted weather values
             print(f"Extracted weather - Temp: {weather_temp}°C, Humidity: {weather_humidity}%, Type: {weather_main} -> {weather_type_numeric}")
 
+        # Helper function to parse time from 'HH:MM' format to datetime
+        def parse_time_string(time_str):
+            """Convert 'HH:MM' time string to datetime object using today's date"""
+            if not time_str:
+                return None
+            try:
+                # Try ISO format first
+                return datetime.fromisoformat(time_str)
+            except ValueError:
+                # Parse 'HH:MM' format
+                hour, minute = map(int, time_str.split(':'))
+                now = datetime.now()
+                return now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
         # Calculate time_since_last_meal_min from meals array
         meals = data.get("meals", [])
         time_since_last_meal_min = None
         if meals:
             # Get the latest meal time
-            latest_meal_time = max([datetime.fromisoformat(meal["time"]) for meal in meals])
+            latest_meal_time = max([parse_time_string(meal["time"]) for meal in meals if meal.get("time")])
             current_time = datetime.now()
             time_since_last_meal_min = int((current_time - latest_meal_time).total_seconds() / 60)
 
@@ -145,7 +159,7 @@ def predict():
         time_since_last_void_min = None
         no_void_visits = [visit for visit in bathroom_visits if visit.get("type") == "no void"]
         if no_void_visits:
-            latest_no_void_time = max([datetime.fromisoformat(visit["time"]) for visit in no_void_visits])
+            latest_no_void_time = max([parse_time_string(visit["time"]) for visit in no_void_visits if visit.get("time")])
             current_time = datetime.now()
             time_since_last_void_min = int((current_time - latest_no_void_time).total_seconds() / 60)
 
@@ -155,7 +169,7 @@ def predict():
             current_time = datetime.now()
             last_60_min_visits = [
                 visit for visit in bathroom_visits
-                if (current_time - datetime.fromisoformat(visit["time"])).total_seconds() <= 3600
+                if visit.get("time") and (current_time - parse_time_string(visit["time"])).total_seconds() <= 3600
             ]
 
             # Check for void accidents in last 60 minutes
@@ -271,47 +285,68 @@ def predict():
         else:
             weather_display = "Weather data not available"
 
-        prompt = f"""You are an expert behavioral analyst specializing in predictive care and intervention strategies. Analyze the following behavioral data and provide comprehensive insights.
+        prompt = f"""You are a Board Certified Behavior Analyst (BCBA) providing session support for ABA therapists and RBTs working in a clinic setting. Analyze the following behavioral data and provide practical, session-ready strategies for table work, NET (Natural Environment Teaching), transitions, and other typical ABA activities.
 
-PREDICTION ANALYSIS:
-- Risk Level: {"HIGH STRESS/ESCALATION RISK" if prediction == 1 else "LOW STRESS/ESCALATION RISK"}
+BEHAVIORAL PREDICTION DATA:
+- Predicted Behavior Risk: {"HIGH - Increased likelihood of challenging behavior/escalation" if prediction == 1 else "LOW - Baseline behavioral stability expected"}
 - Model Confidence: {confidence * 100:.1f}%
-- Probability of High Risk: {prediction_proba[1] * 100:.1f}%
-- Probability of Low Risk: {prediction_proba[0] * 100:.1f}%
+- Probability of Challenging Behavior: {prediction_proba[1] * 100:.1f}%
+- Probability of Appropriate Behavior: {prediction_proba[0] * 100:.1f}%
 
-CONTEXTUAL FACTORS:
-Physical & Environmental:
+ANTECEDENT ANALYSIS (Motivating Operations & Setting Events):
+
+Physiological Motivating Operations:
 - Sleep Quality: {sleep_quality_desc} (Score: {data.get("sleep_quality_numeric")}/4)
-- Current Weather: {weather_display}
-- Time of Day: {data.get("time_numeric")}
-- Day of Week: {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][data.get("weekday_numeric", 0)]}
-
-Physiological Indicators:
-- Time Since Last Meal: {time_since_last_meal_min if time_since_last_meal_min else "N/A"} minutes
-- Time Since Last Void: {time_since_last_void_min if time_since_last_void_min else "N/A"} minutes
+- Time Since Last Meal: {time_since_last_meal_min if time_since_last_meal_min else "N/A"} minutes (hunger may be an MO)
+- Time Since Last Void: {time_since_last_void_min if time_since_last_void_min else "N/A"} minutes (discomfort may be an MO)
 - Toileting Status: {toileting_status_desc}
 - Recent Accident: {"Yes" if recent_accident_flag else "No"}
 
-Social & Environmental Context:
+Environmental Context:
+- Current Weather: {weather_display}
+- Time of Day: {data.get("time_numeric")}
+- Day of Week: {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][data.get("weekday_numeric", 0)]}
 - Transition Type: {data.get("transitionType", "none").replace("_", " ").title()}
-- Social Setting: {data.get("socialInteractionContext", "alone").replace("_", " ").title()}
+- Social Context: {data.get("socialInteractionContext", "alone").replace("_", " ").title()}
 
-Please provide a detailed behavioral analysis in the following format:
+Please provide a detailed behavioral analysis in the following format, using clear ABA language and focusing on what is practical for therapists/technicians working in an ABA clinic session (table work, NET, transitions, etc.):
 
 BEHAVIORAL ANALYSIS:
-[Write 2-3 sentences analyzing the key factors contributing to the current risk level and what patterns are most significant]
-
+In 3–5 sentences, describe:
+- How current motivating operations (sleep, hunger, toileting, sensory context) and recent events might be setting the occasion for problem behavior.
+- The most likely antecedent patterns and probable functions of problem behavior in this context (for example, escape, attention, tangible, automatic).
+- How this risk profile might show up during typical ABA activities (discrete trials, transitions between tasks, group time, NET).
+- How current motivating operations (sleep, hunger, toileting, sensory context) and recent events might be setting the occasion for problem behavior.
 KEY RISK FACTORS:
-[List the 2-3 most concerning factors from the data above]
+List the 2–4 most clinically relevant risk factors from the data above. Focus specifically on:
+- Antecedent triggers or transitions that are likely to produce problem behavior.
+- Current MOs/EOs (for example, low sleep, long time since meal/void, recent accident).
+- Social or environmental variables (group size, noise level, type of transition) that increase the likelihood of escalation.
 
 PROTECTIVE FACTORS:
-[List 1-2 positive factors that may help reduce risk]
+List 2–3 factors that the ABA team can lean on during this session, such as:
+- Existing supports (visual schedules, token systems, first/then, transition warnings).
+- Learner strengths or strong reinforcers that can be used proactively.
+- Any contextual elements that reduce risk (predictable routine, 1:1 support, calm environment).
+- Antecedent triggers or transitions that are likely to produce problem behavior.
+ACTIONABLE RECOMMENDATIONS:
+Provide 4–6 concrete, session-ready ABA strategies. Each item should be:
+- A specific action that a therapist/RBT can implement in the next 1–2 hours.
+- Focused on antecedent interventions (for example, transition warnings, task modification, choice-making), proactive reinforcement (for example, dense schedule of reinforcement, noncontingent access to certain stimuli), and teaching/rehearsing replacement behaviors (for example, functional communication) BEFORE problem behavior escalates.
+- Written in "do this" language (for example, "Before starting work, provide a 2-step visual 'first/then' with a preferred item," not vague suggestions).
+- Any contextual elements that reduce risk (predictable routine, 1:1 support, calm environment).
 
 ACTIONABLE RECOMMENDATIONS:
-[Provide 4-6 specific, actionable interventions numbered 1-6. Each should be practical and directly address the identified risk factors. Format each as a clear action item.]
+Provide 4–6 concrete, session-ready ABA strategies. Each item should be:
+- A specific action that a therapist/RBT can implement in the next 1–2 hours.
+- Focused on antecedent interventions (for example, transition warnings, task modification, choice-making), proactive reinforcement (for example, dense schedule of reinforcement, noncontingent access to certain stimuli), and teaching/rehearsing replacement behaviors (for example, functional communication) BEFORE problem behavior escalates.
+- Written in "do this" language (for example, "Before starting work, provide a 2-step visual 'first/then' with a preferred item," not vague suggestions).
 
 MONITORING PRIORITIES:
-[List 2-3 things caregivers should closely monitor over the next few hours]"""
+List 2–4 things the ABA team should actively watch for and document during the session, such as:
+- Early warning signs or precursor behaviors that typically occur before full escalation.
+- How the learner responds to specific antecedent strategies or reinforcement changes.
+- Any changes in suspected function or triggers that should be communicated to the supervising BCBA and used to refine the behavior plan or prediction model later."""
 
         message = client.messages.create(
             model=model_name,

@@ -12,6 +12,7 @@ interface ChatMessage {
   role: ChatRole
   content: string
   timestamp: string
+  hidden?: boolean // Flag to hide messages from UI while keeping them in context
 }
 
 interface ChatAgentOverlayProps {
@@ -22,16 +23,32 @@ export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const initialMessages: ChatMessage[] = [];
+
+    // If we have prediction context, include the full analysis as the first message (hidden from UI)
+    if (predictionContext?.analysis) {
+      initialMessages.push({
+        id: 'context',
+        role: 'assistant',
+        content: predictionContext.analysis,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        hidden: true, // Hide from UI but keep in conversation context
+      });
+    }
+
+    // Add welcome message
+    initialMessages.push({
       id: 'welcome',
       role: 'assistant',
       content: predictionContext
-        ? "Hi! I'm your BCBA session support assistant. I have access to the behavioral prediction analysis and can provide practical, session-ready strategies for table work, NET, transitions, and other ABA activities. Ask me about antecedents, functions, specific interventions, or what to monitor during the session!"
+        ? "Hi! I'm your BCBA session support assistant. I have access to the behavioral prediction analysis above and can provide practical, session-ready strategies for table work, NET, transitions, and other ABA activities. Ask me about specific antecedents, functions, interventions, or recommendations!"
         : "Hi! I'm your BCBA session support assistant. I can help with practical ABA strategies for clinic sessions, including antecedent interventions, reinforcement schedules, replacement behaviors, and what to document. How can I support your session today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    },
-  ])
+    });
+
+    return initialMessages;
+  })
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
@@ -62,30 +79,24 @@ export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
       const riskLevel = predictionContext.prediction_label || (predictionContext.prediction === 1 ? 'High Risk' : 'Low Risk');
       const confidence = predictionContext.confidence ? Math.round(predictionContext.confidence * 100) : 'N/A';
 
-      systemPrompt += `\n\nYou have access to the following behavioral prediction data and ABA analysis. Use this to provide function-based, immediately implementable recommendations:\n\n`;
-      systemPrompt += `BEHAVIORAL PREDICTION DATA:\n`;
-      systemPrompt += `- Risk of Escalation: ${riskLevel}\n`;
-      systemPrompt += `- Model Confidence: ${confidence}%\n`;
+      systemPrompt += `\n\nYou have access to a behavioral prediction analysis that was provided in the conversation history. The analysis includes:`;
+      systemPrompt += `\n- Risk Level: ${riskLevel} (Confidence: ${confidence}%)`;
 
       if (predictionContext.probabilities) {
-        systemPrompt += `- Probability of Challenging Behavior: ${Math.round(predictionContext.probabilities.high_risk * 100)}%\n`;
-        systemPrompt += `- Probability of Appropriate Behavior: ${Math.round(predictionContext.probabilities.low_risk * 100)}%\n`;
+        systemPrompt += `\n- Probability of Challenging Behavior: ${Math.round(predictionContext.probabilities.high_risk * 100)}%`;
+        systemPrompt += `\n- Probability of Appropriate Behavior: ${Math.round(predictionContext.probabilities.low_risk * 100)}%`;
       }
 
       if (predictionContext.weather_used) {
-        systemPrompt += `\nENVIRONMENTAL CONTEXT:\n`;
-        systemPrompt += `- Temperature: ${predictionContext.weather_used.temperature}°C\n`;
-        systemPrompt += `- Humidity: ${predictionContext.weather_used.humidity}%\n`;
-        systemPrompt += `- Weather: ${predictionContext.weather_used.condition}\n`;
+        systemPrompt += `\n- Environmental Context: ${predictionContext.weather_used.temperature}°C, ${predictionContext.weather_used.humidity}% humidity, ${predictionContext.weather_used.condition}`;
       }
 
-      if (predictionContext.analysis) {
-        systemPrompt += `\nFULL BCBA BEHAVIORAL ANALYSIS:\n${predictionContext.analysis}\n`;
-      }
+      systemPrompt += `\n\nThe full behavioral analysis with risk factors, protective factors, actionable recommendations, and monitoring priorities is available in the conversation history. When the user refers to specific numbered items (like "recommendation 4" or "risk factor 2"), refer to the EXACT numbering from the analysis provided earlier in the conversation.`;
 
-      systemPrompt += `\nWhen responding:\n`;
+      systemPrompt += `\n\nWhen responding:\n`;
+      systemPrompt += `- Always reference the specific numbered items from the analysis when the user asks about them\n`;
       systemPrompt += `- Provide concrete, "do this now" strategies that can be implemented in the next 1-2 hours\n`;
-      systemPrompt += `- Reference specific MOs/EOs, antecedents, and functions from the data above\n`;
+      systemPrompt += `- Reference specific MOs/EOs, antecedents, and functions from the data\n`;
       systemPrompt += `- Suggest specific ABA tools: visual schedules, first/then boards, token systems, timers, choice boards\n`;
       systemPrompt += `- Recommend specific reinforcement strategies: dense SR+ schedules (FR1, VR2), DRA, DRO, behavioral momentum\n`;
       systemPrompt += `- Include replacement behaviors: FCT, appropriate mands, coping skills\n`;
@@ -245,7 +256,7 @@ export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
             <CardContent className="flex flex-col gap-3 h-full pb-4 pt-3">
               {/* Message list */}
               <div className="flex-1 min-h-[14rem] max-h-[26rem] overflow-y-auto rounded-xl border-2 border-purple-100 dark:border-purple-900/50 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm p-3 space-y-3 text-sm shadow-inner">
-                {messages.map(msg => (
+                {messages.filter(msg => !msg.hidden).map(msg => (
                   <div
                     key={msg.id}
                     className={cn(

@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     const requestBody = {
       model: MODEL_NAME,
-      max_tokens: 1024, // Increased for more detailed responses with context
+      max_tokens: 2048, // Increased to accommodate full analysis in context
       system: systemPrompt, // Use the system prompt from frontend or default ✅
       messages: anthropicMessages, // only user & assistant ✅
     };

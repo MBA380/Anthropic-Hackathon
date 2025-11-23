@@ -329,6 +329,7 @@ List 2–3 factors that the ABA team can lean on during this session, such as:
 - Learner strengths or strong reinforcers that can be used proactively.
 - Any contextual elements that reduce risk (predictable routine, 1:1 support, calm environment).
 - Antecedent triggers or transitions that are likely to produce problem behavior.
+
 ACTIONABLE RECOMMENDATIONS:
 Provide 4–6 concrete, session-ready ABA strategies. Each item should be:
 - A specific action that a therapist/RBT can implement in the next 1–2 hours.
@@ -336,11 +337,6 @@ Provide 4–6 concrete, session-ready ABA strategies. Each item should be:
 - Written in "do this" language (for example, "Before starting work, provide a 2-step visual 'first/then' with a preferred item," not vague suggestions).
 - Any contextual elements that reduce risk (predictable routine, 1:1 support, calm environment).
 
-ACTIONABLE RECOMMENDATIONS:
-Provide 4–6 concrete, session-ready ABA strategies. Each item should be:
-- A specific action that a therapist/RBT can implement in the next 1–2 hours.
-- Focused on antecedent interventions (for example, transition warnings, task modification, choice-making), proactive reinforcement (for example, dense schedule of reinforcement, noncontingent access to certain stimuli), and teaching/rehearsing replacement behaviors (for example, functional communication) BEFORE problem behavior escalates.
-- Written in "do this" language (for example, "Before starting work, provide a 2-step visual 'first/then' with a preferred item," not vague suggestions).
 
 MONITORING PRIORITIES:
 List 2–4 things the ABA team should actively watch for and document during the session, such as:

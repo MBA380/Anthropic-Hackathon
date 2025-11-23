@@ -54,7 +54,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Behavior Insights
+                ABAi
               </h1>
               <p className="text-slate-600 dark:text-slate-300 mt-2 text-lg">
                 AI-Powered Autism Behavior Prediction System for Caregivers

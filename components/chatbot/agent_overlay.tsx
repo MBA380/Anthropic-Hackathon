@@ -64,7 +64,7 @@ export function ChatAgentOverlay({ predictionContext }: ChatAgentOverlayProps) {
 
       systemPrompt += `\n\nYou have access to the following behavioral prediction data and ABA analysis. Use this to provide function-based, immediately implementable recommendations:\n\n`;
       systemPrompt += `BEHAVIORAL PREDICTION DATA:\n`;
-      systemPrompt += `- Predicted Behavior Risk: ${riskLevel}\n`;
+      systemPrompt += `- Risk of Escalation: ${riskLevel}\n`;
       systemPrompt += `- Model Confidence: ${confidence}%\n`;
 
       if (predictionContext.probabilities) {

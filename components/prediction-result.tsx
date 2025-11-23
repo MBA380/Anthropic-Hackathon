@@ -77,10 +77,10 @@ export default function PredictionResult({ data }: PredictionResultProps) {
         </p>
       </div>
 
-      {/* Predicted Behavior */}
+      {/* Risk of Escalation */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-emerald-200 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
         <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-3">
-          Predicted Behavior
+          Risk of Escalation
         </p>
         <p className="text-xl font-bold text-slate-900 dark:text-white leading-relaxed">
           {data.prediction_label || data.prediction || 'Processing...'}

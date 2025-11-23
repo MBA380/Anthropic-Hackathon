@@ -288,7 +288,7 @@ def predict():
         prompt = f"""You are a Board Certified Behavior Analyst (BCBA) providing session support for ABA therapists and RBTs working in a clinic setting. Analyze the following behavioral data and provide practical, session-ready strategies for table work, NET (Natural Environment Teaching), transitions, and other typical ABA activities.
 
 BEHAVIORAL PREDICTION DATA:
-- Predicted Behavior Risk: {"HIGH - Increased likelihood of challenging behavior/escalation" if prediction == 1 else "LOW - Baseline behavioral stability expected"}
+- Risk of Escalation: {"HIGH - Increased likelihood of challenging behavior/escalation" if prediction == 1 else "LOW - Baseline behavioral stability expected"}
 - Model Confidence: {confidence * 100:.1f}%
 - Probability of Challenging Behavior: {prediction_proba[1] * 100:.1f}%
 - Probability of Appropriate Behavior: {prediction_proba[0] * 100:.1f}%

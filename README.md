@@ -4,6 +4,11 @@
 
 ABA Forecast is a prototype clinical-support tool that forecasts the likelihood of behavioral escalation for clients with Autism Spectrum Disorder (ASD) at specific times of the day. The system helps therapists anticipate challenging periods and plan targeted strategies to reduce reactive crisis management.
 
+## Demo Video 🎥
+Watch a quick walkthrough of ABA Forecast in action:
+
+https://github.com/user-attachments/assets/e8eb66d1-8c04-45f6-8e06-e6e658cef61e
+
 ## Key Features ✨
 
 - **Behavioral Prediction** — ML model trained on clinic data to estimate escalation risk.

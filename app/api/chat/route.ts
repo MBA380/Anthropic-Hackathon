@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL_NAME = 'claude-3-5-haiku-20241022'; // or another Claude model you can use
+const MODEL_NAME = 'claude-sonnet-4-5-20250929'; // or another Claude model you can use
 
 type ChatMessage = {
   role: 'user' | 'assistant' | 'system';

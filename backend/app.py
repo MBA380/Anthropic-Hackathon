@@ -30,7 +30,7 @@ if not api_key:
 
 model_path = Path("backend/models/behavior_predictor.joblib")
 model = joblib.load(model_path)
-model_name = "claude-sonnet-4-5-20250929" # or another Claude model you can use
+model_name = "claude-3-5-haiku-20241022" # or another Claude model you can use
 
 client = Anthropic(api_key=api_key)
 

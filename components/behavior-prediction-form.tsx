@@ -42,6 +42,12 @@ const getCurrentTime = () => {
   return now.toTimeString().slice(0, 5);
 };
 
+const getTimeOneHourFromNow = () => {
+  const now = new Date();
+  now.setHours(now.getHours() + 1);
+  return now.toTimeString().slice(0, 5);
+};
+
 export default function BehaviorPredictionForm({
   onSubmit,
   isLoading,
@@ -50,11 +56,11 @@ export default function BehaviorPredictionForm({
 
   const [formData, setFormData] = useState<FormData>({
     sleepQuality: '',
-    predictionTime: '',
+    predictionTime: getTimeOneHourFromNow(),
     meals: [],
     bathroomVisits: [],
     socialInteractionContext: '',
-    transitionType: '',
+    transitionType: 'none',
   });
 
   const [mealType, setMealType] = useState<'meal' | 'snack'>('meal');
@@ -69,10 +75,10 @@ export default function BehaviorPredictionForm({
   }, []);
 
   const tabs = [
-    { id: 0, name: 'Basic Info', icon: '🌙' },
+    { id: 0, name: 'Social & Environment', icon: '👥' },
     { id: 1, name: 'Meals & Snacks', icon: '🍽️' },
     { id: 2, name: 'Bathroom', icon: '🚽' },
-    { id: 3, name: 'Social & Environment', icon: '👥' },
+    { id: 3, name: 'Time Query', icon: '⏰' },
   ];
 
   const handleSelectChange = (field: string, value: string) => {
@@ -170,31 +176,40 @@ export default function BehaviorPredictionForm({
               </Select>
             </div>
 
-            {/* Predict for Specific Time */}
-            <div className="space-y-3 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-blue-200 dark:border-blue-900">
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  id="specificTime"
-                  checked={formData.predictionTime !== ''}
-                  onChange={(e) => handleSelectChange('predictionTime', e.target.checked ? '12:00' : '')}
-                  className="w-5 h-5 border-2 border-slate-400 dark:border-slate-500 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                />
-                <label htmlFor="specificTime" className="text-base font-semibold text-slate-800 dark:text-slate-200 cursor-pointer">
-                  ⏰ Predict for a specific time
-                </label>
-              </div>
+            {/* Social Interaction Context */}
+            <div className="space-y-3">
+              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+                Social Interaction Context *
+              </label>
+              <Select value={formData.socialInteractionContext} onValueChange={(value) => handleSelectChange('socialInteractionContext', value)}>
+                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                  <SelectValue placeholder="Select interaction context" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alone">👤 Alone with therapist</SelectItem>
+                  <SelectItem value="plus_one">👥 Therapist plus 1 peer</SelectItem>
+                  <SelectItem value="small_group">👥👥 Small group (2-3 peers)</SelectItem>
+                  <SelectItem value="large_group">👥👥👥 Large group (4+ peers)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {formData.predictionTime !== '' && (
-                <div className="mt-3 animate-fade-in">
-                  <input
-                    type="time"
-                    value={formData.predictionTime}
-                    onChange={(e) => handleSelectChange('predictionTime', e.target.value)}
-                    className="w-full px-4 py-3 text-lg border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              )}
+            {/* Transition Type */}
+            <div className="space-y-3">
+              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+                Transition Type
+              </label>
+              <Select value={formData.transitionType} onValueChange={(value) => handleSelectChange('transitionType', value)}>
+                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                  <SelectValue placeholder="Select transition type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">✅ None</SelectItem>
+                  <SelectItem value="minor">🟡 Minor</SelectItem>
+                  <SelectItem value="moderate">🟠 Moderate</SelectItem>
+                  <SelectItem value="major">🔴 Major</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         );
@@ -343,40 +358,22 @@ export default function BehaviorPredictionForm({
       case 3:
         return (
           <div className="space-y-6 animate-fade-in">
-            {/* Social Interaction Context */}
-            <div className="space-y-3">
+            {/* Predict for Specific Time */}
+            <div className="space-y-4">
               <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
-                Social Interaction Context *
+                ⏰ Prediction Time
               </label>
-              <Select value={formData.socialInteractionContext} onValueChange={(value) => handleSelectChange('socialInteractionContext', value)}>
-                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
-                  <SelectValue placeholder="Select interaction context" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alone">👤 Alone with therapist</SelectItem>
-                  <SelectItem value="plus_one">👥 Therapist plus 1 peer</SelectItem>
-                  <SelectItem value="small_group">👥👥 Small group (2-3 peers)</SelectItem>
-                  <SelectItem value="large_group">👥👥👥 Large group (4+ peers)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Transition Type */}
-            <div className="space-y-3">
-              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
-                Transition Type
-              </label>
-              <Select value={formData.transitionType} onValueChange={(value) => handleSelectChange('transitionType', value)}>
-                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
-                  <SelectValue placeholder="Select transition type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">✅ None</SelectItem>
-                  <SelectItem value="minor">🟡 Minor</SelectItem>
-                  <SelectItem value="moderate">🟠 Moderate</SelectItem>
-                  <SelectItem value="major">🔴 Major</SelectItem>
-                </SelectContent>
-              </Select>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Select the time you want to predict behavior for. Default is one hour from now.
+              </p>
+              <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-blue-200 dark:border-blue-900">
+                <input
+                  type="time"
+                  value={formData.predictionTime}
+                  onChange={(e) => handleSelectChange('predictionTime', e.target.value)}
+                  className="w-full px-4 py-3 text-lg border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
             </div>
           </div>
         );

@@ -48,7 +48,6 @@ export default function BehaviorPredictionForm({
     patientName: '',
     primaryConcern: '',
     supportFocus: '',
-    careTeamEmail: '',
     clinicName: '',
   });
 
@@ -194,20 +193,6 @@ export default function BehaviorPredictionForm({
                   className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="careteam-email" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
-                Care Team Email (for AI recaps)
-              </label>
-              <input
-                type="email"
-                id="careteam-email"
-                value={formData.careTeamEmail}
-                onChange={(e) => handleInputChange('careTeamEmail', e.target.value)}
-                placeholder="name@clinic.com"
-                className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
             </div>
 
             <p className="text-xs text-slate-500 dark:text-slate-400">

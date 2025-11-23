@@ -89,7 +89,6 @@ function AssessmentPageContent() {
       patientName: data.patientName,
       primaryConcern: data.primaryConcern,
       supportFocus: data.supportFocus,
-      careTeamEmail: data.careTeamEmail,
       clinicName: data.clinicName,
     }
 

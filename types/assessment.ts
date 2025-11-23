@@ -8,7 +8,6 @@ export interface BehaviorAssessmentFormData {
   patientName: string
   primaryConcern: string
   supportFocus: string
-  careTeamEmail: string
   clinicName: string
 }
 
@@ -35,5 +34,5 @@ export interface SavedAssessment {
 
 export type PatientSnapshot = Pick<
   BehaviorAssessmentFormData,
-  'patientName' | 'primaryConcern' | 'supportFocus' | 'careTeamEmail' | 'clinicName'
+  'patientName' | 'primaryConcern' | 'supportFocus' | 'clinicName'
 >

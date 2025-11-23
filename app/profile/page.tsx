@@ -10,7 +10,6 @@ const emptySnapshot: PatientSnapshot = {
   patientName: '',
   primaryConcern: '',
   supportFocus: '',
-  careTeamEmail: '',
   clinicName: '',
 }
 
@@ -70,10 +69,6 @@ export default function ProfilePage() {
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Support focus</p>
                 <p className="text-lg font-semibold text-slate-900 dark:text-white">{snapshot.supportFocus || 'Document supports to see them here'}</p>
                 <p className="text-sm text-slate-600 dark:text-slate-300">{snapshot.clinicName || 'Clinic/program optional'}</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 p-4 md:col-span-2">
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Care team contact</p>
-                <p className="text-sm text-slate-700 dark:text-slate-200">{snapshot.careTeamEmail || 'Add an email to receive summaries.'}</p>
               </div>
             </div>
           ) : (

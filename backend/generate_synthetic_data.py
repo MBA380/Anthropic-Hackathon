@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Utility for generating ABA-informed synthetic data for ABAi."""
+"""Utility for generating ABA-informed synthetic data for ABA Forecast."""
 
 from dataclasses import dataclass
 from pathlib import Path

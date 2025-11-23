@@ -1,8 +1,8 @@
-# ABAi
+# ABA Forecast
 
 ## Overview
 
-ABAi is a prototype clinical-support tool that forecasts the likelihood of behavior
+ABA Forecast is a prototype clinical-support tool that forecasts the likelihood of behavior
 escalation for a specific autistic child at specific times of the day. The system is built on:
 
 - Daily clinician input for sleep quality
@@ -13,7 +13,7 @@ escalation for a specific autistic child at specific times of the day. The syste
 - Claude for interpretation, explanation, and strategy generation
 
 The objective is to help clinicians anticipate challenging periods, improve preparation,
-and reduce reactive crisis management. ABAi is not a diagnostic device.
+and reduce reactive crisis management. ABA Forecast is not a diagnostic device.
 It provides planning support and strategy suggestions derived from patterns in the
 data and ABA-informed principles.
 

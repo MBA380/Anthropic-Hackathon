@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Training pipeline for the ABAi stress-level classifier."""
+"""Training pipeline for the ABA Forecast stress-level classifier."""
 
 from dataclasses import dataclass
 from pathlib import Path

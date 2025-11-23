@@ -7,7 +7,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'ABAi - Behavior Prediction System',
+  title: 'ABA Forecast - Behavior Prediction System',
   description: 'AI-Powered Autism Behavior Prediction System for ABA Therapists and Caregivers',
   generator: 'v0.app',
   icons: {

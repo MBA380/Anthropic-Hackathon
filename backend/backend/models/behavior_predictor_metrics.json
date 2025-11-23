@@ -1,0 +1,91 @@
+{
+  "accuracy": 0.7764,
+  "macro_f1": 0.5992,
+  "class_distribution": {
+    "1": 0.8599,
+    "0": 0.1401
+  },
+  "classification_report": {
+    "0": {
+      "precision": 0.2857142857142857,
+      "recall": 0.3979591836734694,
+      "f1-score": 0.3326226012793177,
+      "support": 196.0
+    },
+    "1": {
+      "precision": 0.8952972493345164,
+      "recall": 0.8380398671096345,
+      "f1-score": 0.8657228657228657,
+      "support": 1204.0
+    },
+    "accuracy": 0.7764285714285715,
+    "macro avg": {
+      "precision": 0.590505767524401,
+      "recall": 0.617999525391552,
+      "f1-score": 0.5991727335010917,
+      "support": 1400.0
+    },
+    "weighted avg": {
+      "precision": 0.809955634427684,
+      "recall": 0.7764285714285715,
+      "f1-score": 0.791088828700769,
+      "support": 1400.0
+    }
+  },
+  "model_path": "C:\\Users\\punja\\Anthropic-Hackathon\\backend\\backend\\models\\behavior_predictor.joblib",
+  "train_samples": 5600,
+  "val_samples": 1400,
+  "top_feature_importance": [
+    {
+      "feature": "time_since_last_void_min",
+      "importance": 0.1463,
+      "relative_importance": 0.1463
+    },
+    {
+      "feature": "time_numeric",
+      "importance": 0.1373,
+      "relative_importance": 0.1373
+    },
+    {
+      "feature": "time_since_last_meal_min",
+      "importance": 0.1273,
+      "relative_importance": 0.1273
+    },
+    {
+      "feature": "humidity_percent",
+      "importance": 0.1142,
+      "relative_importance": 0.1142
+    },
+    {
+      "feature": "temperature_c",
+      "importance": 0.0849,
+      "relative_importance": 0.0849
+    },
+    {
+      "feature": "recent_accident_flag",
+      "importance": 0.0834,
+      "relative_importance": 0.0834
+    },
+    {
+      "feature": "transition_type_numeric",
+      "importance": 0.0788,
+      "relative_importance": 0.0788
+    },
+    {
+      "feature": "weekday_numeric",
+      "importance": 0.0632,
+      "relative_importance": 0.0632
+    },
+    {
+      "feature": "social_context_numeric",
+      "importance": 0.0524,
+      "relative_importance": 0.0524
+    },
+    {
+      "feature": "sleep_quality_numeric",
+      "importance": 0.0423,
+      "relative_importance": 0.0423
+    }
+  ],
+  "decision_threshold": 0.71
+}

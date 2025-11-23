@@ -40,3 +40,5 @@ pandas==2.2.3
 numpy==2.2.2
 joblib==1.4.2
 xgboost
+railtracks==1.1.18
+railtracks-cli==1.115

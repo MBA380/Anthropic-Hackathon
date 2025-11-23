@@ -10,30 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface MealEntry {
-  id: string;
-  type: 'meal' | 'snack';
-  time: string;
-}
-
-interface BathroomEntry {
-  id: string;
-  type: 'no void' | 'urine' | 'bowel movement' | 'urine accident' | 'bowel movement accident';
-  time: string;
-}
-
-interface FormData {
-  sleepQuality: string;
-  predictionTime: string;
-  meals: MealEntry[];
-  bathroomVisits: BathroomEntry[];
-  socialInteractionContext: string;
-  transitionType: string;
-}
+import {
+  type BehaviorAssessmentFormData,
+  type MealEntry,
+  type BathroomEntry,
+} from '@/types/assessment';
 
 interface BehaviorPredictionFormProps {
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: BehaviorAssessmentFormData) => void;
   isLoading: boolean;
 }
 
@@ -54,13 +38,18 @@ export default function BehaviorPredictionForm({
 }: BehaviorPredictionFormProps) {
   const [activeTab, setActiveTab] = useState(0);
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<BehaviorAssessmentFormData>({
     sleepQuality: '',
     predictionTime: getTimeOneHourFromNow(),
     meals: [],
     bathroomVisits: [],
     socialInteractionContext: '',
     transitionType: 'none',
+    patientName: '',
+    primaryConcern: '',
+    supportFocus: '',
+    careTeamEmail: '',
+    clinicName: '',
   });
 
   const [mealType, setMealType] = useState<'meal' | 'snack'>('meal');
@@ -75,17 +64,19 @@ export default function BehaviorPredictionForm({
   }, []);
 
   const tabs = [
-    { id: 0, name: 'Social & Environment', icon: '👥' },
-    { id: 1, name: 'Meals & Snacks', icon: '🍽️' },
-    { id: 2, name: 'Bathroom', icon: '🚽' },
-    { id: 3, name: 'Time Query', icon: '⏰' },
+    { id: 0, name: 'Patient Info', icon: '🩺' },
+    { id: 1, name: 'Social & Environment', icon: '👥' },
+    { id: 2, name: 'Meals & Snacks', icon: '🍽️' },
+    { id: 3, name: 'Bathroom', icon: '🚽' },
+    { id: 4, name: 'Time Query', icon: '⏰' },
   ];
 
   const handleSelectChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleInputChange = (field: keyof BehaviorAssessmentFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAddMeal = () => {
@@ -100,20 +91,14 @@ export default function BehaviorPredictionForm({
       time: mealTime,
     };
 
-    setFormData((prev) => ({
-      ...prev,
-      meals: [...prev.meals, newMeal],
-    }));
+    setFormData((prev) => ({ ...prev, meals: [...prev.meals, newMeal] }));
 
     setMealType('meal');
     setMealTime(getCurrentTime());
   };
 
   const handleRemoveMeal = (id: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      meals: prev.meals.filter((meal) => meal.id !== id),
-    }));
+    setFormData((prev) => ({ ...prev, meals: prev.meals.filter((meal) => meal.id !== id) }));
   };
 
   const handleAddBathroom = () => {
@@ -128,26 +113,20 @@ export default function BehaviorPredictionForm({
       time: bathroomTime,
     };
 
-    setFormData((prev) => ({
-      ...prev,
-      bathroomVisits: [...prev.bathroomVisits, newBathroom],
-    }));
+    setFormData((prev) => ({ ...prev, bathroomVisits: [...prev.bathroomVisits, newBathroom] }));
 
     setBathroomType('no void');
     setBathroomTime(getCurrentTime());
   };
 
   const handleRemoveBathroom = (id: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      bathroomVisits: prev.bathroomVisits.filter((visit) => visit.id !== id),
-    }));
+    setFormData((prev) => ({ ...prev, bathroomVisits: prev.bathroomVisits.filter((visit) => visit.id !== id) }));
   };
 
   const handleSubmit = () => {
     // Validate required fields
-    if (!formData.sleepQuality || !formData.socialInteractionContext) {
-      alert('Please fill in all required fields (Sleep Quality and Social Interaction Context)');
+    if (!formData.patientName || !formData.sleepQuality || !formData.socialInteractionContext) {
+      alert('Please fill in the patient info and required context fields (Sleep Quality and Social Interaction Context).');
       return;
     }
 
@@ -159,13 +138,94 @@ export default function BehaviorPredictionForm({
       case 0:
         return (
           <div className="space-y-6 animate-fade-in">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="patient-name" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  Patient Name
+                </label>
+                <input
+                  type="text"
+                  id="patient-name"
+                  value={formData.patientName}
+                  onChange={(e) => handleInputChange('patientName', e.target.value)}
+                  placeholder="Who are we supporting today?"
+                  className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="primary-concern" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  Primary Concern / Trigger
+                </label>
+                <input
+                  type="text"
+                  id="primary-concern"
+                  value={formData.primaryConcern}
+                  onChange={(e) => handleInputChange('primaryConcern', e.target.value)}
+                  placeholder="e.g., transitions, peer conflict"
+                  className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="support-focus" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  Support Focus
+                </label>
+                <input
+                  type="text"
+                  id="support-focus"
+                  value={formData.supportFocus}
+                  onChange={(e) => handleInputChange('supportFocus', e.target.value)}
+                  placeholder="e.g., calming strategies, transitions"
+                  className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="clinic-name" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  Clinic / Program
+                </label>
+                <input
+                  type="text"
+                  id="clinic-name"
+                  value={formData.clinicName}
+                  onChange={(e) => handleInputChange('clinicName', e.target.value)}
+                  placeholder="Optional"
+                  className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="careteam-email" className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                Care Team Email (for AI recaps)
+              </label>
+              <input
+                type="email"
+                id="careteam-email"
+                value={formData.careTeamEmail}
+                onChange={(e) => handleInputChange('careTeamEmail', e.target.value)}
+                placeholder="name@clinic.com"
+                className="w-full rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Start each assessment with the patient snapshot so downstream sections stay contextualized.
+            </p>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="space-y-6 animate-fade-in">
             {/* Sleep Quality */}
             <div className="space-y-3">
-              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+              <label htmlFor="sleep-quality" className="block text-base font-semibold text-slate-800 dark:text-slate-200">
                 Sleep Quality *
               </label>
               <Select value={formData.sleepQuality} onValueChange={(value) => handleSelectChange('sleepQuality', value)}>
-                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                <SelectTrigger id="sleep-quality" className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                   <SelectValue placeholder="Select sleep quality" />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,11 +238,11 @@ export default function BehaviorPredictionForm({
 
             {/* Social Interaction Context */}
             <div className="space-y-3">
-              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+              <label htmlFor="social-context" className="block text-base font-semibold text-slate-800 dark:text-slate-200">
                 Social Interaction Context *
               </label>
               <Select value={formData.socialInteractionContext} onValueChange={(value) => handleSelectChange('socialInteractionContext', value)}>
-                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                <SelectTrigger id="social-context" className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
                   <SelectValue placeholder="Select interaction context" />
                 </SelectTrigger>
                 <SelectContent>
@@ -196,11 +256,11 @@ export default function BehaviorPredictionForm({
 
             {/* Transition Type */}
             <div className="space-y-3">
-              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+              <label htmlFor="transition-type" className="block text-base font-semibold text-slate-800 dark:text-slate-200">
                 Transition Type
               </label>
               <Select value={formData.transitionType} onValueChange={(value) => handleSelectChange('transitionType', value)}>
-                <SelectTrigger className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
+                <SelectTrigger id="transition-type" className="bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 h-12 text-base hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
                   <SelectValue placeholder="Select transition type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -214,7 +274,7 @@ export default function BehaviorPredictionForm({
           </div>
         );
 
-      case 1:
+      case 2:
         return (
           <div className="space-y-5 animate-fade-in">
             <div className="space-y-4 p-5 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-orange-200 dark:border-orange-900">
@@ -237,9 +297,10 @@ export default function BehaviorPredictionForm({
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Time</label>
+                    <label htmlFor="meal-time" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Time</label>
                     <input
                       type="time"
+                      id="meal-time"
                       value={mealTime}
                       onChange={(e) => setMealTime(e.target.value)}
                       className="w-full px-3 py-2 text-sm border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
@@ -283,7 +344,7 @@ export default function BehaviorPredictionForm({
           </div>
         );
 
-      case 2:
+      case 3:
         return (
           <div className="space-y-5 animate-fade-in">
             <div className="space-y-4 p-5 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-teal-200 dark:border-teal-900">
@@ -309,9 +370,10 @@ export default function BehaviorPredictionForm({
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Time</label>
+                    <label htmlFor="bathroom-time" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Time</label>
                     <input
                       type="time"
+                      id="bathroom-time"
                       value={bathroomTime}
                       onChange={(e) => setBathroomTime(e.target.value)}
                       className="w-full px-3 py-2 text-sm border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -355,24 +417,27 @@ export default function BehaviorPredictionForm({
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-6 animate-fade-in">
             {/* Predict for Specific Time */}
             <div className="space-y-4">
-              <label className="block text-base font-semibold text-slate-800 dark:text-slate-200">
+              <label htmlFor="prediction-time" className="block text-base font-semibold text-slate-800 dark:text-slate-200">
                 ⏰ Prediction Time
               </label>
+
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Select the time you want to predict behavior for. Default is one hour from now.
               </p>
               <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-xl border-2 border-blue-200 dark:border-blue-900">
                 <input
                   type="time"
+                  id="prediction-time"
                   value={formData.predictionTime}
                   onChange={(e) => handleSelectChange('predictionTime', e.target.value)}
                   className="w-full px-4 py-3 text-lg border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+
               </div>
             </div>
           </div>

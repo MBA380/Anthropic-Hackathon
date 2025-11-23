@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 import { ASSESSMENT_STORAGE_KEY, PROFILE_STORAGE_KEY } from '@/lib/constants'
 import type { PatientSnapshot, SavedAssessment } from '@/types/assessment'
@@ -94,10 +95,17 @@ export default function ProfilePage() {
           {history.length ? (
             <div className="mt-6 space-y-4">
               {history.map((entry) => (
-                <div key={entry.id} className="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-900/20 p-4">
+                <Link
+                  key={entry.id}
+                  href={`/assessment?assessmentId=${entry.id}`}
+                  className="block rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-900/20 p-4 transition-all hover:shadow-lg hover:scale-[1.02] hover:bg-emerald-100/80 dark:hover:bg-emerald-900/30 cursor-pointer"
+                >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{entry.label}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{entry.label}</p>
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400">→ View</span>
+                      </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400">{formatTimestamp(entry.createdAt)}</p>
                     </div>
                     {entry.confidenceLabel && (
@@ -107,7 +115,7 @@ export default function ProfilePage() {
                     )}
                   </div>
                   <p className="mt-3 text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{entry.summary}</p>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

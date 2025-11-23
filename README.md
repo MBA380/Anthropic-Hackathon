@@ -152,6 +152,14 @@ python backend/train_model.py
 python backend/generate_synthetic_data.py
 ```
 
+- Clear local storage (to reset frontend state):
+
+Press f12 to open dev tools, go to Console, and run:
+```bash
+localStorage.clear();
+location.reload();
+```
+
 ## Contributing 🤝
 
 - Please open issues for bugs or feature requests.

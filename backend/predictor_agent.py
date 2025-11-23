@@ -116,22 +116,31 @@ def _build_prompt(context: str) -> str:
         <3-5 sentences covering motivating operations, likely functions, and how risk may show up>
 
         KEY RISK FACTORS:
-        - item 1
-        - item 2
-        - item 3
+        - Main risk factor 1
+          • Sub-detail if needed
+          • Sub-detail if needed
+        - Main risk factor 2
+        - Main risk factor 3
 
         PROTECTIVE FACTORS:
-        - item 1
-        - item 2
+        - Main protective factor 1
+          • Sub-detail if needed
+        - Main protective factor 2
 
         ACTIONABLE RECOMMENDATIONS:
-        1. concrete action within next hour
-        2. concrete action within next hour
-        3. concrete action within next hour
+        1. Main recommendation title or action
+          • Specific implementation step
+          • Specific implementation step
+        2. Second main recommendation
+          • Specific implementation step
+        3. Third main recommendation
 
         MONITORING PRIORITIES:
-        - early warning sign or data to collect
-        - how to evaluate effectiveness of strategies
+        - Main monitoring priority 1
+          • Specific indicator to track
+        - Main monitoring priority 2
+        
+        Note: Use hierarchical structure where main points can have sub-points indented with bullet points (•) for additional details or steps.
         """
     ).strip()
 

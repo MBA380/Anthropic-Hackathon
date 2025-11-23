@@ -1,20 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 import BehaviorPredictionForm from '@/components/behavior-prediction-form'
 import WeatherDisplay from '@/components/weather-display'
 import PredictionResult from '@/components/prediction-result'
 import { ChatAgentOverlay } from '@/components/chatbot/agent_overlay'
-import { Button } from '@/components/ui/button'
 import { ASSESSMENT_STORAGE_KEY, PROFILE_STORAGE_KEY } from '@/lib/constants'
 import type { BehaviorAssessmentFormData, PatientSnapshot, SavedAssessment } from '@/types/assessment'
 
-export default function AssessmentPage() {
+function AssessmentPageContent() {
   const [prediction, setPrediction] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const formSectionRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   useEffect(() => {
     // pre-warm persisted store so profile page has latest data if user reloads
@@ -23,6 +25,26 @@ export default function AssessmentPage() {
       localStorage.setItem(ASSESSMENT_STORAGE_KEY, JSON.stringify([]))
     }
   }, [])
+
+  // Load saved assessment if assessmentId is in URL
+  useEffect(() => {
+    const assessmentId = searchParams.get('assessmentId')
+    if (!assessmentId || typeof window === 'undefined') return
+
+    try {
+      const storedHistory = localStorage.getItem(ASSESSMENT_STORAGE_KEY)
+      if (storedHistory) {
+        const history: SavedAssessment[] = JSON.parse(storedHistory)
+        const savedAssessment = history.find(a => a.id === assessmentId)
+        if (savedAssessment?.predictionData) {
+          setPrediction(savedAssessment.predictionData)
+          setShowResults(true)
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to load saved assessment', error)
+    }
+  }, [searchParams])
 
   const summarizeAssessment = (result: any) => {
     if (!result) return 'Assessment details pending.'
@@ -49,6 +71,7 @@ export default function AssessmentPage() {
       label: result?.prediction_label || (result?.prediction === 1 ? 'High Risk' : 'Low Risk'),
       confidenceLabel: result?.confidence ? `${Math.round(result.confidence * 100)}%` : undefined,
       summary: summarizeAssessment(result),
+      predictionData: result, // Store full prediction data
     }
 
     try {
@@ -110,6 +133,8 @@ export default function AssessmentPage() {
   const handleNewAssessment = () => {
     setShowResults(false)
     setPrediction(null)
+    // Clear the assessmentId from URL
+    router.push('/assessment')
     formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -151,3 +176,18 @@ export default function AssessmentPage() {
     </main>
   )
 }
+
+export default function AssessmentPage() {
+  return (
+    <Suspense fallback={
+      <main className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">Loading assessment...</div>
+        </div>
+      </main>
+    }>
+      <AssessmentPageContent />
+    </Suspense>
+  )
+}
+

@@ -30,6 +30,7 @@ export interface SavedAssessment {
   label: string
   confidenceLabel?: string
   summary: string
+  predictionData?: any // Full prediction result from API
 }
 
 export type PatientSnapshot = Pick<

@@ -10,16 +10,16 @@ export default function PredictionResult({ data }: PredictionResultProps) {
   const [showSummary, setShowSummary] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Parse the Claude analysis text into structured sections
+  // Parse the Claude analysis text into structured sections with hierarchical support
   const parseAnalysis = (analysisText: string) => {
     if (!analysisText) return null;
 
     const sections: {
       behavioralAnalysis?: string;
-      riskFactors?: string[];
-      protectiveFactors?: string[];
-      recommendations?: string[];
-      monitoringPriorities?: string[];
+      riskFactors?: Array<{ main: string; subPoints?: string[] }>;
+      protectiveFactors?: Array<{ main: string; subPoints?: string[] }>;
+      recommendations?: Array<{ main: string; subPoints?: string[] }>;
+      monitoringPriorities?: Array<{ main: string; subPoints?: string[] }>;
     } = {};
 
     // Extract sections using regex
@@ -33,36 +33,72 @@ export default function PredictionResult({ data }: PredictionResultProps) {
       sections.behavioralAnalysis = behavioralAnalysisMatch[1].trim();
     }
 
+    // Helper to parse hierarchical bullet/numbered lists
+    const parseHierarchicalList = (text: string): Array<{ main: string; subPoints?: string[] }> => {
+      const lines = text.trim().split('\n').map(line => line.trim()).filter(Boolean);
+      const items: Array<{ main: string; subPoints?: string[] }> = [];
+      let currentItem: { main: string; subPoints?: string[] } | null = null;
+
+      for (const line of lines) {
+        // Check if it's a main point (starts with number or main bullet)
+        const mainNumberMatch = line.match(/^(\d+)\.\s*(.+)$/);
+        const mainBulletMatch = line.match(/^[-•*]\s*(.+)$/);
+
+        // Check if it's a sub-point (indented or starts with letter/dash)
+        const subPointMatch = line.match(/^\s+[-•*]\s*(.+)$/) ||
+                             line.match(/^[a-z]\)\s*(.+)$/i) ||
+                             line.match(/^\s+\d+\.\s*(.+)$/);
+
+        if (mainNumberMatch) {
+          // This is a numbered main point
+          if (currentItem) items.push(currentItem);
+          currentItem = { main: mainNumberMatch[2].trim(), subPoints: [] };
+        } else if (mainBulletMatch && !subPointMatch) {
+          // This is a bulleted main point (not indented)
+          if (currentItem) items.push(currentItem);
+          currentItem = { main: mainBulletMatch[1].trim(), subPoints: [] };
+        } else if (subPointMatch && currentItem) {
+          // This is a sub-point, add it to current item
+          const subText = subPointMatch[1].trim();
+          if (subText) {
+            if (!currentItem.subPoints) currentItem.subPoints = [];
+            currentItem.subPoints.push(subText);
+          }
+        } else if (currentItem && line && !line.match(/^(BEHAVIORAL|KEY|PROTECTIVE|ACTIONABLE|MONITORING)/i)) {
+          // Continuation of current point or sub-point
+          if (currentItem.subPoints && currentItem.subPoints.length > 0) {
+            // Append to last sub-point
+            currentItem.subPoints[currentItem.subPoints.length - 1] += ' ' + line;
+          } else {
+            // Append to main point
+            currentItem.main += ' ' + line;
+          }
+        }
+      }
+
+      if (currentItem) items.push(currentItem);
+
+      // Clean up empty subPoints arrays
+      return items.map(item => ({
+        main: item.main,
+        subPoints: item.subPoints && item.subPoints.length > 0 ? item.subPoints : undefined
+      }));
+    };
+
     if (riskFactorsMatch) {
-      sections.riskFactors = riskFactorsMatch[1]
-        .trim()
-        .split('\n')
-        .map(line => line.replace(/^[-•*]\s*/, '').trim())
-        .filter(line => line.length > 0);
+      sections.riskFactors = parseHierarchicalList(riskFactorsMatch[1]);
     }
 
     if (protectiveFactorsMatch) {
-      sections.protectiveFactors = protectiveFactorsMatch[1]
-        .trim()
-        .split('\n')
-        .map(line => line.replace(/^[-•*]\s*/, '').trim())
-        .filter(line => line.length > 0);
+      sections.protectiveFactors = parseHierarchicalList(protectiveFactorsMatch[1]);
     }
 
     if (recommendationsMatch) {
-      sections.recommendations = recommendationsMatch[1]
-        .trim()
-        .split('\n')
-        .map(line => line.replace(/^\d+\.?\s*/, '').replace(/^[-•*]\s*/, '').trim())
-        .filter(line => line.length > 0);
+      sections.recommendations = parseHierarchicalList(recommendationsMatch[1]);
     }
 
     if (monitoringMatch) {
-      sections.monitoringPriorities = monitoringMatch[1]
-        .trim()
-        .split('\n')
-        .map(line => line.replace(/^[-•*]\s*/, '').trim())
-        .filter(line => line.length > 0);
+      sections.monitoringPriorities = parseHierarchicalList(monitoringMatch[1]);
     }
 
     return sections;
@@ -93,10 +129,11 @@ export default function PredictionResult({ data }: PredictionResultProps) {
       .filter(Boolean)
       .join(' ');
 
-    const watchFors = analysis.riskFactors?.slice(0, 3) || [];
-    const supports = analysis.protectiveFactors?.slice(0, 3) || [];
-    const nextSteps = analysis.recommendations?.slice(0, 3) || [];
-    const monitor = analysis.monitoringPriorities?.slice(0, 3) || [];
+    // Extract main points only for summary
+    const watchFors = analysis.riskFactors?.slice(0, 3).map(item => item.main) || [];
+    const supports = analysis.protectiveFactors?.slice(0, 3).map(item => item.main) || [];
+    const nextSteps = analysis.recommendations?.slice(0, 3).map(item => item.main) || [];
+    const monitor = analysis.monitoringPriorities?.slice(0, 3).map(item => item.main) || [];
 
     const sections: string[] = [
       `Summary:\n${header}${overview ? `\n${overview}` : ''}`,
@@ -292,10 +329,24 @@ export default function PredictionResult({ data }: PredictionResultProps) {
             <span>⚠️</span> Key Risk Factors
           </p>
           <ul className="space-y-3">
-            {analysis.riskFactors.map((factor: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
-                <span className="text-red-600 dark:text-red-400 text-lg flex-shrink-0 mt-0.5">⚠</span>
-                <span className="text-slate-900 dark:text-white text-base leading-relaxed">{factor}</span>
+            {analysis.riskFactors.map((factor, idx: number) => (
+              <li key={idx} className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-red-600 dark:text-red-400 text-lg flex-shrink-0 mt-0.5">⚠</span>
+                  <div className="flex-1">
+                    <span className="text-slate-900 dark:text-white text-base leading-relaxed">{factor.main}</span>
+                    {factor.subPoints && factor.subPoints.length > 0 && (
+                      <ul className="mt-2 ml-4 space-y-1">
+                        {factor.subPoints.map((subPoint, subIdx) => (
+                          <li key={subIdx} className="flex items-start gap-2">
+                            <span className="text-red-500 dark:text-red-400 text-sm mt-1">•</span>
+                            <span className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{subPoint}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
@@ -309,10 +360,24 @@ export default function PredictionResult({ data }: PredictionResultProps) {
             <span>🛡️</span> Protective Factors
           </p>
           <ul className="space-y-3">
-            {analysis.protectiveFactors.map((factor: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                <span className="text-green-600 dark:text-green-400 text-lg flex-shrink-0 mt-0.5">✓</span>
-                <span className="text-slate-900 dark:text-white text-base leading-relaxed">{factor}</span>
+            {analysis.protectiveFactors.map((factor, idx: number) => (
+              <li key={idx} className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-green-600 dark:text-green-400 text-lg flex-shrink-0 mt-0.5">✓</span>
+                  <div className="flex-1">
+                    <span className="text-slate-900 dark:text-white text-base leading-relaxed">{factor.main}</span>
+                    {factor.subPoints && factor.subPoints.length > 0 && (
+                      <ul className="mt-2 ml-4 space-y-1">
+                        {factor.subPoints.map((subPoint, subIdx) => (
+                          <li key={subIdx} className="flex items-start gap-2">
+                            <span className="text-green-500 dark:text-green-400 text-sm mt-1">•</span>
+                            <span className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{subPoint}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
@@ -325,11 +390,25 @@ export default function PredictionResult({ data }: PredictionResultProps) {
           <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2">
             <span>💡</span> Actionable Recommendations
           </p>
-          <ul className="space-y-3">
-            {analysis.recommendations.map((rec: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-slate-900/50 rounded-lg hover:bg-emerald-100 dark:hover:bg-slate-900/70 transition-colors">
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold text-lg flex-shrink-0 min-w-[24px]">{idx + 1}.</span>
-                <span className="text-slate-900 dark:text-white text-base leading-relaxed">{rec}</span>
+          <ul className="space-y-4">
+            {analysis.recommendations.map((rec, idx: number) => (
+              <li key={idx} className="p-4 bg-emerald-50 dark:bg-slate-900/50 rounded-lg hover:bg-emerald-100 dark:hover:bg-slate-900/70 transition-colors">
+                <div className="flex items-start gap-3">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-lg flex-shrink-0 min-w-[24px]">{idx + 1}.</span>
+                  <div className="flex-1">
+                    <span className="text-slate-900 dark:text-white text-base leading-relaxed font-medium">{rec.main}</span>
+                    {rec.subPoints && rec.subPoints.length > 0 && (
+                      <ul className="mt-2 ml-2 space-y-1.5">
+                        {rec.subPoints.map((subPoint, subIdx) => (
+                          <li key={subIdx} className="flex items-start gap-2">
+                            <span className="text-emerald-500 dark:text-emerald-400 text-sm mt-1">•</span>
+                            <span className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{subPoint}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
@@ -343,10 +422,24 @@ export default function PredictionResult({ data }: PredictionResultProps) {
             <span>👁️</span> Monitoring Priorities
           </p>
           <ul className="space-y-3">
-            {analysis.monitoringPriorities.map((priority: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-3 p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                <span className="text-purple-600 dark:text-purple-400 text-lg flex-shrink-0 mt-0.5">👁</span>
-                <span className="text-slate-900 dark:text-white text-base leading-relaxed">{priority}</span>
+            {analysis.monitoringPriorities.map((priority, idx: number) => (
+              <li key={idx} className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-purple-600 dark:text-purple-400 text-lg flex-shrink-0 mt-0.5">👁</span>
+                  <div className="flex-1">
+                    <span className="text-slate-900 dark:text-white text-base leading-relaxed">{priority.main}</span>
+                    {priority.subPoints && priority.subPoints.length > 0 && (
+                      <ul className="mt-2 ml-4 space-y-1">
+                        {priority.subPoints.map((subPoint, subIdx) => (
+                          <li key={subIdx} className="flex items-start gap-2">
+                            <span className="text-purple-500 dark:text-purple-400 text-sm mt-1">•</span>
+                            <span className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{subPoint}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>

@@ -3,13 +3,14 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from anthropic import Anthropic
+import railtracks as rt
 from datetime import datetime
 import joblib
 import pandas as pd
 import json
 import re
 import traceback
+import asyncio
 
 # Load .env from the same directory as this script
 env_path = Path(__file__).parent / '.env'
@@ -32,7 +33,20 @@ model_path = Path("backend/models/behavior_predictor.joblib")
 model = joblib.load(model_path)
 model_name = "claude-3-5-haiku-20241022" # or another Claude model you can use
 
-client = Anthropic(api_key=api_key)
+# Railtracks agent cache for behavior analysis
+_behavior_analysis_agent = None
+
+def _get_behavior_analysis_agent():
+    """Get or create the behavior analysis agent using Railtracks"""
+    global _behavior_analysis_agent
+    if _behavior_analysis_agent is None:
+        system_message = """You are a Board Certified Behavior Analyst (BCBA) providing session support for ABA therapists and RBTs working in a clinic setting. Analyze behavioral data and provide practical, session-ready strategies for table work, NET (Natural Environment Teaching), transitions, and other typical ABA activities. Use clear ABA terminology and focus on antecedent interventions, motivating operations, and concrete recommendations."""
+        _behavior_analysis_agent = rt.agent_node(
+            "Behavior Analysis Agent",
+            llm=rt.llm.AnthropicLLM(model_name),
+            system_message=system_message,
+        )
+    return _behavior_analysis_agent
 
 # Store latest weather data
 weather = {}
@@ -344,14 +358,10 @@ List 2–4 things the ABA team should actively watch for and document during the
 - How the learner responds to specific antecedent strategies or reinforcement changes.
 - Any changes in suspected function or triggers that should be communicated to the supervising BCBA and used to refine the behavior plan or prediction model later."""
 
-        message = client.messages.create(
-            model=model_name,
-            max_tokens=2048,
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        # Parse the Claude response to extract sections
-        claude_response = message.content[0].text
+        # Use Railtracks to call the behavior analysis agent
+        agent = _get_behavior_analysis_agent()
+        result = asyncio.run(rt.call(agent, prompt))
+        claude_response = result.text.strip()
 
         return jsonify({
             "prediction": int(prediction),
@@ -502,6 +512,122 @@ List 2–4 things the ABA team should actively watch for and document during the
 #         print(traceback.format_exc())
 #         return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
+
+# Chat agent cache
+_chat_agent = None
+
+def _get_chat_agent(system_message: str):
+    """Get or create a chat agent with the specified system message using Railtracks"""
+    global _chat_agent
+    # For simplicity, we'll create a new agent if the system message changes
+    # In production, you might want to cache based on system message hash
+    agent = rt.agent_node(
+        "BCBA Chat Assistant",
+        llm=rt.llm.AnthropicLLM(model_name),
+        system_message=system_message,
+    )
+    return agent
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    """Chat endpoint using Railtracks for conversation with the BCBA assistant"""
+    try:
+        data = request.json
+        messages = data.get("messages", [])
+
+        if not messages or not isinstance(messages, list):
+            return jsonify({"error": "Invalid messages format"}), 400
+
+        # Extract system message if provided, otherwise use default
+        system_message_default = """You are a Board Certified Behavior Analyst (BCBA) providing real-time session support for ABA therapists, RBTs, and technicians working in clinic settings with learners. Your responses should be practical, concrete, and immediately implementable during table work, NET (Natural Environment Teaching), transitions, and other ABA activities.
+
+When providing guidance:
+- Use clear ABA terminology (MOs/EOs, antecedents, functions, reinforcement schedules, etc.)
+- Focus on the four functions of behavior: Escape, Attention, Tangible, and Automatic/Sensory
+- Provide concrete "do this" recommendations, not vague suggestions
+- Prioritize antecedent interventions and proactive strategies BEFORE problem behavior occurs
+- Suggest specific tools: visual schedules, first/then boards, token systems, choice boards, timers
+- Recommend specific reinforcement strategies: dense schedules (FR1, VR2), differential reinforcement (DRA, DRO, DRI), behavioral momentum
+- Include replacement behaviors: functional communication training (FCT), coping skills, appropriate mands
+- Consider current MOs/EOs (hunger, sleep, toileting, sensory needs) in your recommendations
+- Provide session-ready strategies that can be implemented in the next 1-2 hours
+
+Format your responses to be actionable:
+- Start with the most important/urgent strategy
+- Use bullet points for multiple recommendations
+- Be specific about timing, frequency, and implementation
+- Include what to watch for (precursor behaviors, early warning signs)
+- Suggest what data to collect for the BCBA
+
+Important limitations:
+- You are providing session support, not conducting formal FBAs or writing BIPs
+- You cannot diagnose or replace a supervising BCBA
+- Always recommend documenting observations and escalating concerns to the supervising BCBA
+- For safety or crisis situations, prioritize immediate safety protocols and professional consultation
+
+Your goal is to help ABA staff implement effective, function-based interventions during active sessions."""
+
+        system_msg = None
+        for msg in messages:
+            if msg.get("role") == "system":
+                system_msg = msg.get("content")
+                break
+
+        system_prompt = system_msg or system_message_default
+
+        # Filter out system messages and build conversation history
+        conversation_messages = [msg for msg in messages if msg.get("role") in ["user", "assistant"]]
+
+        # Build the full conversation context
+        conversation_text = ""
+        for msg in conversation_messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            if role == "user":
+                conversation_text += f"User: {content}\n\n"
+            elif role == "assistant":
+                conversation_text += f"Assistant: {content}\n\n"
+
+        # Get the last user message
+        last_user_message = ""
+        for msg in reversed(conversation_messages):
+            if msg.get("role") == "user":
+                last_user_message = msg.get("content", "")
+                break
+
+        if not last_user_message:
+            return jsonify({"error": "No user message found"}), 400
+
+        # Create agent with system message
+        agent = _get_chat_agent(system_prompt)
+
+        # If there's conversation history, include it in the prompt
+        if len(conversation_messages) > 1:
+            # Build context from previous messages (excluding the last one)
+            context_messages = conversation_messages[:-1]
+            context_text = "Previous conversation:\n"
+            for msg in context_messages:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                if role == "user":
+                    context_text += f"User: {content}\n\n"
+                elif role == "assistant":
+                    context_text += f"Assistant: {content}\n\n"
+
+            full_prompt = f"{context_text}\nUser: {last_user_message}\n\nPlease respond to the user's latest message, taking into account the conversation history above."
+        else:
+            full_prompt = last_user_message
+
+        # Use Railtracks to call the agent
+        result = asyncio.run(rt.call(agent, full_prompt))
+        reply_text = result.text.strip()
+
+        return jsonify({"reply": reply_text})
+
+    except Exception as e:
+        print(f"Error in /chat: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/health', methods=['GET'])
 def health():

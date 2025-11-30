@@ -1,5 +1,7 @@
 # ABA Forecast 🧠🌤️
 
+> **✨ NEW: Migrated to Railtracks!** Previously used direct Anthropic API calls (~80 lines in frontend). Now centralized in backend with agent caching, reducing frontend code by 62.5% and improving security (API keys only in backend).
+
 ## Overview
 
 ABA Forecast is a prototype clinical-support tool that forecasts the likelihood of behavioral escalation for clients with Autism Spectrum Disorder (ASD) at specific times of the day. The system helps therapists anticipate challenging periods and plan targeted strategies to reduce reactive crisis management.
@@ -9,8 +11,22 @@ ABA Forecast is a prototype clinical-support tool that forecasts the likelihood 
 - **Behavioral Prediction** — ML model trained on clinic data to estimate escalation risk.
 - **Weather-aware** — integrates OpenWeatherMap data to include environmental context 🌦️.
 - **Multi-factor Inputs** — sleep quality, food intake, toileting, transitions, and social context are considered.
-- **AI Insights** — Anthropic Claude provides explanations and ABA-informed strategy suggestions 💡.
+- **AI Insights** — Anthropic Claude (via Railtracks) provides explanations and ABA-informed strategy suggestions 💡.
 - **Interactive Dashboard** — therapists can input data and view predictions and recommendations in the UI.
+
+## Architecture Changes 🔄
+
+**Before Railtracks:**
+- Frontend made direct Anthropic API calls (`~80 lines` of API handling code)
+- API keys required in both frontend and backend environments
+- Message formatting and error handling duplicated across components
+
+**After Railtracks:**
+- All LLM logic centralized in backend using Railtracks agents
+- Frontend code reduced by **62.5%** (now just `~30 lines` proxying to backend)
+- Single API key location (backend only) - improved security
+- Agent caching for better performance
+- Consistent interface for all LLM interactions
 
 ## Important Notes ⚠️
 
@@ -21,7 +37,7 @@ ABA Forecast is a prototype clinical-support tool that forecasts the likelihood 
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **Backend**: Python Flask
-- **AI / ML**: Anthropic Claude API, scikit-learn
+- **AI / ML**: Anthropic Claude API (via Railtracks), scikit-learn
 - **APIs**: OpenWeatherMap
 - **Package managers**: `pnpm` (frontend), `uv` or `pip` (backend)
 

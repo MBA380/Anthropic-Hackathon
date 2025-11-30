@@ -33,12 +33,12 @@ typer-slim==0.20.0
 typing-extensions==4.15.0
 typing-inspection==0.4.2
 werkzeug==3.1.3
-fastapi==0.115.6
-uvicorn==0.34.0
+fastapi>=0.115.0
+uvicorn>=0.29.0,<0.30.0
 scikit-learn==1.6.1
 pandas==2.2.3
 numpy==2.2.2
 joblib==1.4.2
 xgboost
-railtracks==1.1.18
-railtracks-cli==1.115
+railtracks==1.1.21
+railtracks-cli==1.1.21

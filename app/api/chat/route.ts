@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL_NAME = 'claude-3-5-haiku-20241022'; // or another Claude model you can use
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 
 type ChatMessage = {
   role: 'user' | 'assistant' | 'system';
@@ -50,57 +49,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      console.error('ANTHROPIC_API_KEY is not set on the server for /api/chat');
-      return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY is not configured on the server.' },
-        { status: 500 },
-      );
-    }
-
-    // Extract system message from the messages array if provided, otherwise use default
-    const systemMessage = messages.find((m) => m.role === 'system');
-    const systemPrompt = systemMessage?.content || SYSTEM_PROMPT;
-
-    // ❗ Only keep user & assistant messages. Ignore any "system" roles completely.
-    const nonSystemMessages = messages.filter(
-      (m) => m.role === 'user' || m.role === 'assistant',
-    );
-
-    const anthropicMessages = nonSystemMessages.map((m) => ({
-      role: m.role,
-      content: [{ type: 'text' as const, text: m.content }],
-    }));
-
-    const requestBody = {
-      model: MODEL_NAME,
-      max_tokens: 2048, // Increased to accommodate full analysis in context
-      system: systemPrompt, // Use the system prompt from frontend or default ✅
-      messages: anthropicMessages, // only user & assistant ✅
-    };
-
-    const anthropicResponse = await fetch(ANTHROPIC_API_URL, {
+    // Call the backend chat endpoint which uses Railtracks
+    const backendResponse = await fetch(`${BACKEND_URL}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({ messages }),
     });
 
-    if (!anthropicResponse.ok) {
-      const errorText = await anthropicResponse.text();
-      console.error('Anthropic API error (chat):', errorText);
+    if (!backendResponse.ok) {
+      const errorText = await backendResponse.text();
+      console.error('Backend chat API error:', errorText);
       return NextResponse.json(
-        { error: 'Anthropic API error', details: errorText },
+        { error: 'Backend chat API error', details: errorText },
         { status: 500 },
       );
     }
 
-    const data = await anthropicResponse.json();
-    const replyText: string = data?.content?.[0]?.text ?? '';
+    const data = await backendResponse.json();
+    const replyText: string = data?.reply ?? '';
 
     return NextResponse.json({ reply: replyText });
   } catch (err) {

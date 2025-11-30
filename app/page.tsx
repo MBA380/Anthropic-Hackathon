@@ -1,119 +1,44 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import BehaviorPredictionForm from '@/components/behavior-prediction-form';
-import WeatherDisplay from '@/components/weather-display';
-import PredictionResult from '@/components/prediction-result';
-import { ChatAgentOverlay } from '@/components/chatbot/agent_overlay';
+import Link from 'next/link'
+
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
-  const [prediction, setPrediction] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-
-  const handleFormSubmit = async (formData: any) => {
-    setLoading(true);
-    try {
-      // const response = await fetch('http://localhost:5000/predict', {
-      const response = await fetch('/api/predict', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Backend error:', errorData);
-          throw new Error(`Failed to get prediction: ${errorData.error || response.statusText}`);
-
-      }
-
-      const result = await response.json();
-      setPrediction(result);
-      setShowResults(true);
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error submitting form. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleNewAssessment = () => {
-    setShowResults(false);
-    setPrediction(null);
-  };
-
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <div className="border-b-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                ABA Forecast
-              </h1>
-              <p className="text-slate-600 dark:text-slate-300 mt-2 text-lg">
-                AI-Powered Autism Behavior Prediction System for Caregivers
-              </p>
+    <main className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 px-4 py-20 text-center dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.4),_transparent_60%)]" />
+      <div className="relative mx-auto max-w-4xl space-y-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.4em] text-blue-500">Caregiver Intelligence Hub</p>
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+          ABA Forecast
+        </h1>
+        <p className="text-lg text-slate-600 dark:text-slate-300">
+          AI-powered autism behavior prediction system tuned for in-the-moment caregiver decisions.
+        </p>
+
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button className="min-w-[200px] bg-gradient-to-r from-blue-600 to-purple-600 text-lg text-white shadow-xl" asChild>
+            <Link href="/assessment">Start Assessment</Link>
+          </Button>
+          <Button variant="outline" className="min-w-[200px] border-2 border-slate-200 bg-white/70 text-lg dark:border-slate-700 dark:bg-slate-900/60" asChild>
+            <Link href="/profile">View Profile</Link>
+          </Button>
+        </div>
+
+        <div className="grid gap-4 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 sm:grid-cols-3">
+          {[
+            { label: 'Platform Mode', value: 'Assessment + AI Summary' },
+            { label: 'Care Focus', value: 'ABA Caregivers & RBTs' },
+            { label: 'Visualizer', value: 'Behavior readiness insights' },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-2xl border border-slate-100 bg-white/90 p-4 text-left dark:border-slate-800 dark:bg-slate-900/60">
+              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{stat.label}</p>
+              <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{stat.value}</p>
             </div>
-            <div className="hidden md:block">
-              <div className="text-4xl">🧠✨</div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {!showResults ? (
-          /* Assessment Form View */
-          <div className="max-w-4xl mx-auto">
-            <BehaviorPredictionForm
-              onSubmit={handleFormSubmit} 
-              isLoading={loading}
-            />
-          </div>
-        ) : (
-          <div className="mt-8">
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden shadow-xl shadow-emerald-500/10">
-              {/* Results header */}
-              <div className="bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 border-b-2 border-slate-200 dark:border-slate-700 px-6 pt-4 pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">📊</span>
-                    <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                      Prediction Results
-                    </h2>
-                  </div>
-                  <button
-                    onClick={handleNewAssessment}
-                    className="text-sm px-3 py-1 rounded-full border border-emerald-500/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors"
-                  >
-                    Start New Assessment
-                  </button>
-                </div>
-              </div>
-
-              {/* Result content */}
-              <div className="p-6 md:p-8">
-                <div className="animate-fade-in">
-                  <PredictionResult data={prediction} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Weather display renders invisibly to fetch weather data in background */}
-      <WeatherDisplay />
-
-      {/* Floating chat bubble in the bottom-right, only after there is a prediction */}
-      {prediction && <ChatAgentOverlay predictionContext={prediction} />}
     </main>
-  );
+  )
 }

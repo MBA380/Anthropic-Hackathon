@@ -1,4 +1,4 @@
-# ABA Forecast
+# ABA Forecast 🧠🌤️
 
 > **✨ NEW: Migrated to Railtracks!** Previously used direct Anthropic API calls (~80 lines in frontend). Now centralized in backend with agent caching, reducing frontend code by 62.5% and improving security (API keys only in backend).
 
@@ -6,15 +6,10 @@
 
 ABA Forecast is a prototype clinical-support tool that forecasts the likelihood of behavioral escalation for clients with Autism Spectrum Disorder (ASD) at specific times of the day. The system helps therapists anticipate challenging periods and plan targeted strategies to reduce reactive crisis management.
 
-## Demo Video 
-Watch a quick walkthrough of ABA Forecast in action:
-
-https://github.com/user-attachments/assets/e8eb66d1-8c04-45f6-8e06-e6e658cef61e
-
-## Key Features
+## Key Features ✨
 
 - **Behavioral Prediction** — ML model trained on clinic data to estimate escalation risk.
-- **Weather-aware** — integrates OpenWeatherMap data to include environmental context.
+- **Weather-aware** — integrates OpenWeatherMap data to include environmental context 🌦️.
 - **Multi-factor Inputs** — sleep quality, food intake, toileting, transitions, and social context are considered.
 - **AI Insights** — Anthropic Claude (via Railtracks) provides explanations and ABA-informed strategy suggestions 💡.
 - **Interactive Dashboard** — therapists can input data and view predictions and recommendations in the UI.
@@ -38,7 +33,7 @@ https://github.com/user-attachments/assets/e8eb66d1-8c04-45f6-8e06-e6e658cef61e
 - ABA Forecast is **not a diagnostic device**. Use it as a planning aid only.
 - Predictions are probabilistic and should supplement professional clinical judgment.
 
-## Technology Stack
+## Technology Stack 🛠️
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **Backend**: Python Flask
@@ -46,7 +41,7 @@ https://github.com/user-attachments/assets/e8eb66d1-8c04-45f6-8e06-e6e658cef61e
 - **APIs**: OpenWeatherMap
 - **Package managers**: `pnpm` (frontend), `uv` or `pip` (backend)
 
-## Prerequisites
+## Prerequisites ✅
 
 Install these before setup:
 
@@ -60,7 +55,7 @@ You will also need API keys for:
 - Anthropic Claude API: https://console.anthropic.com/
 - OpenWeatherMap API: https://openweathermap.org/api
 
-## Installation & Setup
+## Installation & Setup 🚀
 
 Follow these steps from the project root directory.
 
@@ -114,7 +109,7 @@ python -m venv .venv
 pip install -r backend/requirements.txt
 ```
 
-## Running the App
+## Running the App 🧪
 
 You must run both frontend and backend servers.
 
@@ -134,7 +129,7 @@ python backend/app.py
 
 Backend API defaults to `http://localhost:5000`.
 
-## Project Layout
+## Project Layout 📁
 
 ```
 Anthropic-Hackathon/
@@ -149,17 +144,17 @@ Anthropic-Hackathon/
 │   ├── data/
 │   └── models/
 ├── components/             # React components
-└── README.md               # You are here
+└── README.md               # You are here 👋
 ```
 
-## Usage — Quick Flow
+## Usage — Quick Flow 🧭
 
 1. Enter client/session data (sleep, food, toileting, transitions).
 2. View predicted escalation risk for the day/time slots.
 3. Read AI explanations and suggested ABA strategies.
 4. Monitor trends and update inputs over time.
 
-## Development & Data
+## Development & Data 🧑‍🔬
 
 - Retrain model:
 
@@ -186,14 +181,14 @@ location.reload();
 - Please open issues for bugs or feature requests.
 - For code contributions, create PRs against `dev` and include a clear description and tests where practical.
 
-## License & Use
+## License & Use ⚖️
 
 This project is a prototype for clinical support and educational purposes. Do not use as a replacement for clinical training or professional judgment.
 
-## Contact / Support
+## Contact / Support 📬
 
 Open an issue in this repository for questions, bugs, or feature requests.
 
 ---
 
-Thank you for using ABA Forecast, built to help clinicians plan proactively.
+Thank you for using ABA Forecast — built to help clinicians plan proactively. 💙
